@@ -1,0 +1,7 @@
+# .vscode/
+.DS_Store
+gui/moc*
+darwin/
+deploy/
+res/
+go-expensegui

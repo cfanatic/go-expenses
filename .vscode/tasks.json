@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "1: Generate",
+            "type": "shell",
+            "isBackground": true,
+            "command": "qtmoc desktop gui/",
+            "problemMatcher": []
+        },
+        {
+            "label": "2: Compile",
+            "type": "shell",
+            "isBackground": true,
+            "command": "go build",
+            "problemMatcher": []
+        },
+        {
+            "label": "3: Execute",
+            "type": "shell",
+            "isBackground": true,
+            "command": "./go-expensegui",
+            "problemMatcher": []
+        },
+        {
+            "label": "4: Deploy",
+            "type": "shell",
+            "isBackground": true,
+            "command": "go build && ./go-expensegui",
+            "problemMatcher": []
+        },
+        {
+            "label": "5: All",
+            "type": "shell",
+            "isBackground": true,
+            "command": "qtmoc desktop gui/ && go run .",
+            "problemMatcher": []
+        },
+        {
+            "label": "6: Clean",
+            "type": "shell",
+            "isBackground": true,
+            "command": "rm gui/moc* && rm go-expensegui",
+            "problemMatcher": []
+        },
+    ]
+}
