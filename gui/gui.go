@@ -49,6 +49,9 @@ func (w *Gui) init() {
 	w.bquit = widgets.NewQPushButton2("Quit", nil)
 	w.sitem = gui.NewQStandardItemModel(nil)
 
+	w.bsave.SetEnabled(false)
+	w.bprint.SetEnabled(false)
+
 	w.tview.SetModel(w.sitem)
 	w.hlayout.AddWidget(w.bload, 0, 0)
 	w.hlayout.AddWidget(w.bsave, 0, 0)
@@ -59,14 +62,14 @@ func (w *Gui) init() {
 
 	w.SetLayout(w.vlayout)
 
-	w.bload.ConnectClicked(w.label)
+	w.bload.ConnectClicked(w.load)
 	w.bquit.ConnectClicked(func(bool) { w.qApp.Exit(0) })
 	w.tview.HorizontalHeader().ConnectSectionResized(
 		func(idx, old, new int) { fmt.Printf("Index: %d, Size: %d\n", idx, new) },
 	)
 }
 
-func (w *Gui) label(bool) {
+func (w *Gui) load(bool) {
 	var export []datasheet.Content
 	var err error
 
@@ -77,8 +80,12 @@ func (w *Gui) label(bool) {
 		return
 	}
 
-	if export, err = w.ds.Content(); err != nil {
-		panic("Error during datasheet export!")
+	if export, err = w.ds.Content(); err == nil || w.ds.Err == nil || w.db.Err == nil {
+		w.bsave.SetEnabled(true)
+		w.bprint.SetEnabled(true)
+	} else {
+		panic("Error during datasheet import!")
+
 	}
 
 	for _, trans := range export {
