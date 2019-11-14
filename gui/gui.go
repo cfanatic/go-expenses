@@ -2,6 +2,8 @@ package gui
 
 import (
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/cfanatic/go-expense/account"
 	"github.com/cfanatic/go-expense/database"
@@ -63,6 +65,7 @@ func (w *Gui) init() {
 	w.SetLayout(w.vlayout)
 
 	w.bload.ConnectClicked(w.load)
+	w.bsave.ConnectClicked(w.save)
 	w.bquit.ConnectClicked(func(bool) { w.qApp.Exit(0) })
 	w.tview.HorizontalHeader().ConnectSectionResized(
 		func(idx, old, new int) { fmt.Printf("Index: %d, Size: %d\n", idx, new) },
@@ -116,6 +119,21 @@ func (w *Gui) load(bool) {
 	w.tview.HorizontalHeader().ResizeSection(2, 100)
 	w.tview.HorizontalHeader().ResizeSection(3, 200)
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Fixed)
+}
+
+func (w *Gui) save(bool) {
+	for row := 0; row < w.sitem.RowCount(core.NewQModelIndex()); row++ {
+		trans := []string{}
+		for col := 0; col < w.sitem.ColumnCount(core.NewQModelIndex()); col++ {
+			index := w.sitem.Index(row, col, core.NewQModelIndex())
+			data := w.sitem.Data(index, int(core.Qt__DisplayRole))
+			trans = append(trans, data.ToString())
+		}
+		date, _ := time.Parse("01-02-06", trans[0])
+		amount, _ := strconv.ParseFloat(trans[2], 32)
+		payee, label := trans[1], trans[3]
+		w.db.Save(database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label})
+	}
 }
 
 func (w *Gui) keypressevent(e *gui.QKeyEvent) {
