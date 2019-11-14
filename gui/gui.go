@@ -35,7 +35,7 @@ type Gui struct {
 func (w *Gui) init() {
 	geometry := widgets.QApplication_Desktop().AvailableGeometry(0)
 	w.SetWindowTitle("go-expensegui")
-	w.SetGeometry2(0, 0, 1350, 600)
+	w.SetGeometry2(0, 0, 850, 600)
 	w.Move2((geometry.Width()-w.Width())/2, (geometry.Height()-w.Height())/2)
 
 	w.ConnectKeyPressEvent(w.keypressevent)
@@ -43,11 +43,11 @@ func (w *Gui) init() {
 	w.hlayout = widgets.NewQHBoxLayout()
 	w.vlayout = widgets.NewQVBoxLayout()
 	w.tview = widgets.NewQTableView(nil)
-	w.sitem = gui.NewQStandardItemModel(nil)
 	w.bload = widgets.NewQPushButton2("Load", nil)
 	w.bsave = widgets.NewQPushButton2("Save", nil)
 	w.bprint = widgets.NewQPushButton2("Print", nil)
 	w.bquit = widgets.NewQPushButton2("Quit", nil)
+	w.sitem = gui.NewQStandardItemModel(nil)
 
 	w.tview.SetModel(w.sitem)
 	w.hlayout.AddWidget(w.bload, 0, 0)
@@ -89,7 +89,6 @@ func (w *Gui) label(bool) {
 				gui.NewQStandardItem2(trans.Payee),
 				gui.NewQStandardItem2(fmt.Sprintf("%.2f", trans.Amount)),
 				gui.NewQStandardItem2(item.Label),
-				gui.NewQStandardItem2(trans.Description),
 			)
 		} else {
 			items = append(items,
@@ -97,19 +96,18 @@ func (w *Gui) label(bool) {
 				gui.NewQStandardItem2(trans.Payee),
 				gui.NewQStandardItem2(fmt.Sprintf("%.2f", trans.Amount)),
 				gui.NewQStandardItem2(""),
-				gui.NewQStandardItem2(trans.Description),
 			)
 		}
+		items[1].SetToolTip(trans.Description)
 		w.sitem.AppendRow(items)
 	}
 
-	w.sitem.SetHorizontalHeaderLabels([]string{"Date", "Payee", "Amount", "Label", "Description"})
+	w.sitem.SetHorizontalHeaderLabels([]string{"Date", "Payee", "Amount", "Label"})
 	w.tview.HorizontalHeader().SetSectionResizeMode(widgets.QHeaderView__Interactive)
 	w.tview.HorizontalHeader().ResizeSection(0, 100)
 	w.tview.HorizontalHeader().ResizeSection(1, 400)
 	w.tview.HorizontalHeader().ResizeSection(2, 100)
 	w.tview.HorizontalHeader().ResizeSection(3, 200)
-	w.tview.HorizontalHeader().ResizeSection(4, 500)
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Fixed)
 }
 
