@@ -79,6 +79,9 @@ func (w *Gui) load(bool) {
 	if f := widgets.QFileDialog_GetOpenFileNames(nil, "Open datasheet", core.QDir_HomePath(), "*.xlsx", "", 0); len(f) > 0 {
 		w.ds = datasheet.New(f[0], account.TAB)
 		w.db = database.New(account.ADDRESS, account.NAME, account.COLLECT)
+		if w.ds.Err != nil || w.db.Err != nil {
+			panic("Error during datasheet or database connection attempt!")
+		}
 	} else {
 		return
 	}
