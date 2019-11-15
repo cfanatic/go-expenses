@@ -157,7 +157,9 @@ func (w *Gui) save(bool) {
 		date, _ := time.Parse("01-02-06", trans[0])
 		amount, _ := strconv.ParseFloat(trans[2], 32)
 		payee, label := trans[1], trans[3]
-		w.db.Save(database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label})
+		if len(label) > 0 {
+			w.db.Save(database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label})
+		}
 	}
 }
 
