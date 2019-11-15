@@ -80,18 +80,39 @@ func (w *Gui) load(bool) {
 	if f := widgets.QFileDialog_GetOpenFileNames(nil, "Open datasheet", core.QDir_HomePath(), "*.xlsx", "", 0); len(f) > 0 {
 		w.ds = datasheet.New(f[0], account.TAB)
 		w.db = database.New(account.ADDRESS, account.NAME, account.COLLECT)
-		if w.ds.Err != nil || w.db.Err != nil {
-			panic("Error during datasheet or database connection attempt!")
+		if w.ds.Err != nil {
+			widgets.QMessageBox_Critical(nil,
+				"Cannot open datasheet",
+				"Error during datasheet initialization attempt!",
+				widgets.QMessageBox__Default,
+				widgets.QMessageBox__Default,
+			)
+			return
+		}
+		if w.db.Err != nil {
+			widgets.QMessageBox_Critical(nil,
+				"Cannot open database",
+				"Error during database connection attempt!",
+				widgets.QMessageBox__Default,
+				widgets.QMessageBox__Default,
+			)
+			return
 		}
 	} else {
 		return
 	}
 
-	if export, err = w.ds.Content(); err == nil || w.ds.Err == nil || w.db.Err == nil {
+	if export, err = w.ds.Content(); err == nil {
 		w.bsave.SetEnabled(true)
 		w.bprint.SetEnabled(true)
 	} else {
-		panic("Error during datasheet import!")
+		widgets.QMessageBox_Critical(nil,
+			"Cannot import datasheet",
+			"Error during datasheet import!",
+			widgets.QMessageBox__Default,
+			widgets.QMessageBox__Default,
+		)
+		return
 
 	}
 
