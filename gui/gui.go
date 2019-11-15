@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -68,7 +69,7 @@ func (w *Gui) init() {
 	w.bsave.ConnectClicked(w.save)
 	w.bquit.ConnectClicked(func(bool) { w.qApp.Exit(0) })
 	w.tview.HorizontalHeader().ConnectSectionResized(
-		func(idx, old, new int) { fmt.Printf("Index: %d, Size: %d\n", idx, new) },
+		func(idx, old, new int) { log.Printf("Index: %d, Size: %d\n", idx, new) },
 	)
 }
 
