@@ -137,6 +137,8 @@ func (w *Gui) load(bool) {
 				gui.NewQStandardItem2(""),
 			)
 		}
+		items[0].SetEditable(false)
+		items[0].SetSelectable(false)
 		items[1].SetToolTip(trans.Description)
 		w.sitem.AppendRow(items)
 	}
