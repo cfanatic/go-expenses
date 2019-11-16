@@ -38,7 +38,7 @@ type Gui struct {
 func (w *Gui) init() {
 	geometry := widgets.QApplication_Desktop().AvailableGeometry(0)
 	w.SetWindowTitle("go-expensegui")
-	w.SetGeometry2(0, 0, 850, 600)
+	w.SetGeometry2(0, 0, 865, 600)
 	w.Move2((geometry.Width()-w.Width())/2, (geometry.Height()-w.Height())/2)
 
 	w.ConnectKeyPressEvent(w.keypressevent)
