@@ -116,6 +116,10 @@ func (w *Gui) load(bool) {
 
 	}
 
+	if w.sitem.RowCount(core.NewQModelIndex()) > 0 {
+		w.sitem.RemoveRows(0, w.sitem.RowCount(core.NewQModelIndex()), core.NewQModelIndex())
+	}
+
 	for _, trans := range export {
 		items := []*gui.QStandardItem{}
 		if item, err := w.db.Document("payee", trans.Payee); err == nil {
