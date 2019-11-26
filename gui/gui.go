@@ -25,7 +25,8 @@ type Gui struct {
 	bsave   *widgets.QPushButton
 	bprint  *widgets.QPushButton
 	bquit   *widgets.QPushButton
-	sitem   *gui.QStandardItemModel
+	list    *gui.QStandardItemModel
+	listd   []database.Content
 
 	ds *datasheet.Datasheet
 	db *database.Database
@@ -50,12 +51,13 @@ func (w *Gui) init() {
 	w.bsave = widgets.NewQPushButton2("Save", nil)
 	w.bprint = widgets.NewQPushButton2("Print", nil)
 	w.bquit = widgets.NewQPushButton2("Quit", nil)
-	w.sitem = gui.NewQStandardItemModel(nil)
+	w.list = gui.NewQStandardItemModel(nil)
+	w.listd = []database.Content{}
 
 	w.bsave.SetEnabled(false)
 	w.bprint.SetEnabled(false)
 
-	w.tview.SetModel(w.sitem)
+	w.tview.SetModel(w.list)
 	w.hlayout.AddWidget(w.bload, 0, 0)
 	w.hlayout.AddWidget(w.bsave, 0, 0)
 	w.hlayout.AddWidget(w.bprint, 0, 0)
@@ -68,9 +70,39 @@ func (w *Gui) init() {
 	w.bload.ConnectClicked(w.load)
 	w.bsave.ConnectClicked(w.save)
 	w.bquit.ConnectClicked(func(bool) { w.qApp.Exit(0) })
+	w.list.ConnectItemChanged(w.update)
 	w.tview.HorizontalHeader().ConnectSectionResized(
 		func(idx, old, new int) { log.Printf("Index: %d, Size: %d\n", idx, new) },
 	)
+}
+
+func (w *Gui) update(item *gui.QStandardItem) {
+	var trans []string
+
+	trans = make([]string, 0)
+	for col := 0; col < w.list.ColumnCount(core.NewQModelIndex()); col++ {
+		index := w.list.Index(item.Row(), col, core.NewQModelIndex())
+		data := w.list.Data(index, int(core.Qt__DisplayRole))
+		trans = append(trans, data.ToString())
+	}
+
+	dsold := datasheet.Content{
+		Date:   w.listd[item.Row()].Date.Format("01-02-06"),
+		Payee:  w.listd[item.Row()].Payee,
+		Amount: w.listd[item.Row()].Amount,
+	}
+	dsnew := datasheet.Content{
+		Date:   w.document(trans).Date.Format("01-02-06"),
+		Payee:  w.document(trans).Payee,
+		Amount: w.document(trans).Amount,
+	}
+	dbold := w.listd[item.Row()]
+	dbnew := w.document(trans)
+
+	w.ds.Update(dsold, dsnew)
+	w.db.Update(dbold, dbnew)
+
+	w.listd[item.Row()] = w.document(trans)
 }
 
 func (w *Gui) load(bool) {
@@ -113,11 +145,10 @@ func (w *Gui) load(bool) {
 			widgets.QMessageBox__Default,
 		)
 		return
-
 	}
 
-	if w.sitem.RowCount(core.NewQModelIndex()) > 0 {
-		w.sitem.RemoveRows(0, w.sitem.RowCount(core.NewQModelIndex()), core.NewQModelIndex())
+	if w.list.RowCount(core.NewQModelIndex()) > 0 {
+		w.list.RemoveRows(0, w.list.RowCount(core.NewQModelIndex()), core.NewQModelIndex())
 	}
 
 	for _, trans := range export {
@@ -137,13 +168,15 @@ func (w *Gui) load(bool) {
 				gui.NewQStandardItem2(""),
 			)
 		}
+		date, _ := time.Parse("01-02-06", trans.Date)
 		items[0].SetEditable(false)
 		items[0].SetSelectable(false)
 		items[1].SetToolTip(trans.Description)
-		w.sitem.AppendRow(items)
+		w.list.AppendRow(items)
+		w.listd = append(w.listd, database.Content{Date: date, Payee: trans.Payee, Amount: trans.Amount})
 	}
 
-	w.sitem.SetHorizontalHeaderLabels([]string{"Date", "Payee", "Amount", "Label"})
+	w.list.SetHorizontalHeaderLabels([]string{"Date", "Payee", "Amount", "Label"})
 	w.tview.HorizontalHeader().SetSectionResizeMode(widgets.QHeaderView__Interactive)
 	w.tview.HorizontalHeader().ResizeSection(0, 100)
 	w.tview.HorizontalHeader().ResizeSection(1, 400)
@@ -153,18 +186,15 @@ func (w *Gui) load(bool) {
 }
 
 func (w *Gui) save(bool) {
-	for row := 0; row < w.sitem.RowCount(core.NewQModelIndex()); row++ {
+	for row := 0; row < w.list.RowCount(core.NewQModelIndex()); row++ {
 		trans := []string{}
-		for col := 0; col < w.sitem.ColumnCount(core.NewQModelIndex()); col++ {
-			index := w.sitem.Index(row, col, core.NewQModelIndex())
-			data := w.sitem.Data(index, int(core.Qt__DisplayRole))
+		for col := 0; col < w.list.ColumnCount(core.NewQModelIndex()); col++ {
+			index := w.list.Index(row, col, core.NewQModelIndex())
+			data := w.list.Data(index, int(core.Qt__DisplayRole))
 			trans = append(trans, data.ToString())
 		}
-		date, _ := time.Parse("01-02-06", trans[0])
-		amount, _ := strconv.ParseFloat(trans[2], 32)
-		payee, label := trans[1], trans[3]
-		if len(label) > 0 {
-			w.db.Save(database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label})
+		if doc := w.document(trans); len(doc.Label) > 0 {
+			w.db.Save(doc)
 		}
 	}
 }
@@ -177,4 +207,11 @@ func (w *Gui) keypressevent(e *gui.QKeyEvent) {
 
 func (w *Gui) InitWith(qApp *widgets.QApplication) {
 	w.qApp = qApp
+}
+
+func (w *Gui) document(trans []string) database.Content {
+	date, _ := time.Parse("01-02-06", trans[0])
+	amount, _ := strconv.ParseFloat(trans[2], 32)
+	payee, label := trans[1], trans[3]
+	return database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label}
 }
