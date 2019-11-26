@@ -39,7 +39,7 @@ type Gui struct {
 func (w *Gui) init() {
 	geometry := widgets.QApplication_Desktop().AvailableGeometry(0)
 	w.SetWindowTitle("go-expensegui")
-	w.SetGeometry2(0, 0, 865, 600)
+	w.SetGeometry2(0, 0, 1000, 700)
 	w.Move2((geometry.Width()-w.Width())/2, (geometry.Height()-w.Height())/2)
 
 	w.ConnectKeyPressEvent(w.keypressevent)
@@ -178,11 +178,12 @@ func (w *Gui) load(bool) {
 
 	w.list.SetHorizontalHeaderLabels([]string{"Date", "Payee", "Amount", "Label"})
 	w.tview.HorizontalHeader().SetSectionResizeMode(widgets.QHeaderView__Interactive)
+	w.tview.HorizontalHeader().SetStretchLastSection(true)
 	w.tview.HorizontalHeader().ResizeSection(0, 100)
-	w.tview.HorizontalHeader().ResizeSection(1, 400)
+	w.tview.HorizontalHeader().ResizeSection(1, 500)
 	w.tview.HorizontalHeader().ResizeSection(2, 100)
 	w.tview.HorizontalHeader().ResizeSection(3, 200)
-	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Fixed)
+	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Stretch)
 }
 
 func (w *Gui) save(bool) {
