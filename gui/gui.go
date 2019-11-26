@@ -2,7 +2,6 @@ package gui
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"time"
 
@@ -52,7 +51,6 @@ func (w *Gui) init() {
 	w.bprint = widgets.NewQPushButton2("Print", nil)
 	w.bquit = widgets.NewQPushButton2("Quit", nil)
 	w.list = gui.NewQStandardItemModel(nil)
-	w.listd = []database.Content{}
 
 	w.bsave.SetEnabled(false)
 	w.bprint.SetEnabled(false)
@@ -71,9 +69,6 @@ func (w *Gui) init() {
 	w.bsave.ConnectClicked(w.save)
 	w.bquit.ConnectClicked(func(bool) { w.qApp.Exit(0) })
 	w.list.ConnectItemChanged(w.update)
-	w.tview.HorizontalHeader().ConnectSectionResized(
-		func(idx, old, new int) { log.Printf("Index: %d, Size: %d\n", idx, new) },
-	)
 }
 
 func (w *Gui) update(item *gui.QStandardItem) {
@@ -124,7 +119,7 @@ func (w *Gui) load(bool) {
 		if w.db.Err != nil {
 			widgets.QMessageBox_Critical(nil,
 				"Cannot open database",
-				"Error during database connection attempt!",
+				"Error during database initialization attempt!",
 				widgets.QMessageBox__Default,
 				widgets.QMessageBox__Default,
 			)
@@ -149,6 +144,7 @@ func (w *Gui) load(bool) {
 
 	if w.list.RowCount(core.NewQModelIndex()) > 0 {
 		w.list.RemoveRows(0, w.list.RowCount(core.NewQModelIndex()), core.NewQModelIndex())
+		w.listd = []database.Content{}
 	}
 
 	for _, trans := range export {
@@ -200,6 +196,14 @@ func (w *Gui) save(bool) {
 	}
 }
 
+func (w *Gui) document(trans []string) database.Content {
+	date, _ := time.Parse("01-02-06", trans[0])
+	payee := trans[1]
+	amount, _ := strconv.ParseFloat(trans[2], 32)
+	label := trans[3]
+	return database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label}
+}
+
 func (w *Gui) keypressevent(e *gui.QKeyEvent) {
 	if e.Key() == int(core.Qt__Key_Escape) {
 		w.qApp.Exit(0)
@@ -208,11 +212,4 @@ func (w *Gui) keypressevent(e *gui.QKeyEvent) {
 
 func (w *Gui) InitWith(qApp *widgets.QApplication) {
 	w.qApp = qApp
-}
-
-func (w *Gui) document(trans []string) database.Content {
-	date, _ := time.Parse("01-02-06", trans[0])
-	amount, _ := strconv.ParseFloat(trans[2], 32)
-	payee, label := trans[1], trans[3]
-	return database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label}
 }
