@@ -180,6 +180,8 @@ func (w *Gui) load(bool) {
 	w.tview.HorizontalHeader().ResizeSection(2, 100)
 	w.tview.HorizontalHeader().ResizeSection(3, 200)
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Stretch)
+
+	w.save(true)
 }
 
 func (w *Gui) save(bool) {
