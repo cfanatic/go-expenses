@@ -32,8 +32,6 @@ type Gui struct {
 
 	vlayout *widgets.QVBoxLayout
 	tview   *widgets.QTableView
-	bload   *widgets.QPushButton
-	bquit   *widgets.QPushButton
 	list    *gui.QStandardItemModel
 
 	ds    *datasheet.Datasheet
@@ -52,8 +50,6 @@ func (w *Gui) init() {
 	w.Move2((geometry.Width()-w.Width())/2, (geometry.Height()-w.Height())/2)
 
 	w.lapp = widgets.NewQVBoxLayout()
-	w.bload = widgets.NewQPushButton2("Load", nil)
-	w.bquit = widgets.NewQPushButton2("Quit", nil)
 	w.lbutton = widgets.NewQHBoxLayout()
 
 	w.twidget = widgets.NewQTabWidget(nil)
@@ -81,14 +77,17 @@ func (w *Gui) init() {
 	w.twidget.SetTabEnabled(1, false)
 	w.twidget.SetTabEnabled(2, false)
 
-	w.lbutton.AddWidget(w.bload, 0, 0)
-	w.lbutton.AddWidget(w.bquit, 0, 0)
+	bload := widgets.NewQPushButton2("Load", nil)
+	bquit := widgets.NewQPushButton2("Quit", nil)
+
+	w.lbutton.AddWidget(bload, 0, 0)
+	w.lbutton.AddWidget(bquit, 0, 0)
 	w.lapp.AddWidget(w.twidget, 0, 0)
 	w.lapp.AddLayout(w.lbutton, 0)
 	w.SetLayout(w.lapp)
 
-	w.bload.ConnectClicked(w.load)
-	w.bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
+	bload.ConnectClicked(w.load)
+	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
 	w.list.ConnectItemChanged(w.update)
 	w.ConnectKeyPressEvent(w.keypressevent)
 }
