@@ -16,19 +16,29 @@ import (
 type Gui struct {
 	widgets.QWidget
 
-	qApp    *widgets.QApplication
-	hlayout *widgets.QHBoxLayout
+	qapp    *widgets.QApplication
+	lapp    *widgets.QVBoxLayout
+	lbutton *widgets.QHBoxLayout
+
+	twidget  *widgets.QTabWidget
+	twload   *widgets.QWidget
+	twmonth  *widgets.QWidget
+	twyear   *widgets.QWidget
+	twdebug  *widgets.QWidget
+	twlload  *widgets.QHBoxLayout
+	twlmonth *widgets.QHBoxLayout
+	twlyear  *widgets.QHBoxLayout
+	twldebug *widgets.QHBoxLayout
+
 	vlayout *widgets.QVBoxLayout
 	tview   *widgets.QTableView
 	bload   *widgets.QPushButton
-	bsave   *widgets.QPushButton
-	bprint  *widgets.QPushButton
 	bquit   *widgets.QPushButton
 	list    *gui.QStandardItemModel
-	listd   []database.Content
 
-	ds *datasheet.Datasheet
-	db *database.Database
+	ds    *datasheet.Datasheet
+	db    *database.Database
+	listd []database.Content
 
 	_ func() `constructor:"init"`
 
@@ -38,37 +48,49 @@ type Gui struct {
 func (w *Gui) init() {
 	geometry := widgets.QApplication_Desktop().AvailableGeometry(0)
 	w.SetWindowTitle("go-expensegui")
-	w.SetGeometry2(0, 0, int(float32(geometry.Width())/2.5), geometry.Height()/2)
+	w.SetGeometry2(0, 0, int(float32(geometry.Width())/2.2), geometry.Height()/2)
 	w.Move2((geometry.Width()-w.Width())/2, (geometry.Height()-w.Height())/2)
 
-	w.ConnectKeyPressEvent(w.keypressevent)
+	w.lapp = widgets.NewQVBoxLayout()
+	w.bload = widgets.NewQPushButton2("Load", nil)
+	w.bquit = widgets.NewQPushButton2("Quit", nil)
+	w.lbutton = widgets.NewQHBoxLayout()
 
-	w.hlayout = widgets.NewQHBoxLayout()
+	w.twidget = widgets.NewQTabWidget(nil)
+	w.twload = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twmonth = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twyear = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twdebug = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twlload = widgets.NewQHBoxLayout()
+	w.twlmonth = widgets.NewQHBoxLayout()
+	w.twlyear = widgets.NewQHBoxLayout()
+	w.twldebug = widgets.NewQHBoxLayout()
+
 	w.vlayout = widgets.NewQVBoxLayout()
 	w.tview = widgets.NewQTableView(nil)
-	w.bload = widgets.NewQPushButton2("Load", nil)
-	w.bsave = widgets.NewQPushButton2("Save", nil)
-	w.bprint = widgets.NewQPushButton2("Print", nil)
-	w.bquit = widgets.NewQPushButton2("Quit", nil)
 	w.list = gui.NewQStandardItemModel(nil)
 
-	w.bsave.SetEnabled(false)
-	w.bprint.SetEnabled(false)
-
 	w.tview.SetModel(w.list)
-	w.hlayout.AddWidget(w.bload, 0, 0)
-	w.hlayout.AddWidget(w.bsave, 0, 0)
-	w.hlayout.AddWidget(w.bprint, 0, 0)
-	w.hlayout.AddWidget(w.bquit, 0, 0)
 	w.vlayout.AddWidget(w.tview, 0, 0)
-	w.vlayout.AddLayout(w.hlayout, 0)
 
-	w.SetLayout(w.vlayout)
+	w.twload.SetLayout(w.vlayout)
+	w.twidget.AddTab(w.twload, "Import")
+	w.twidget.AddTab(w.twmonth, "Month")
+	w.twidget.AddTab(w.twyear, "Year")
+	w.twidget.AddTab(w.twdebug, "Debug")
+	w.twidget.SetTabEnabled(1, false)
+	w.twidget.SetTabEnabled(2, false)
+
+	w.lbutton.AddWidget(w.bload, 0, 0)
+	w.lbutton.AddWidget(w.bquit, 0, 0)
+	w.lapp.AddWidget(w.twidget, 0, 0)
+	w.lapp.AddLayout(w.lbutton, 0)
+	w.SetLayout(w.lapp)
 
 	w.bload.ConnectClicked(w.load)
-	w.bsave.ConnectClicked(w.save)
-	w.bquit.ConnectClicked(func(bool) { w.qApp.Exit(0) })
+	w.bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
 	w.list.ConnectItemChanged(w.update)
+	w.ConnectKeyPressEvent(w.keypressevent)
 }
 
 func (w *Gui) update(item *gui.QStandardItem) {
@@ -130,8 +152,8 @@ func (w *Gui) load(bool) {
 	}
 
 	if export, err = w.ds.Content(); err == nil {
-		w.bsave.SetEnabled(true)
-		w.bprint.SetEnabled(true)
+		w.twidget.SetTabEnabled(1, true)
+		w.twidget.SetTabEnabled(2, true)
 	} else {
 		widgets.QMessageBox_Critical(nil,
 			"Cannot import datasheet",
@@ -176,9 +198,9 @@ func (w *Gui) load(bool) {
 	w.list.SetHorizontalHeaderLabels([]string{"Date", "Payee", "Amount", "Label"})
 	w.tview.HorizontalHeader().SetSectionResizeMode(widgets.QHeaderView__Interactive)
 	w.tview.HorizontalHeader().SetStretchLastSection(true)
-	w.tview.HorizontalHeader().ResizeSection(0, int(width/9))
+	w.tview.HorizontalHeader().ResizeSection(0, int(width/10))
 	w.tview.HorizontalHeader().ResizeSection(1, int(width/2))
-	w.tview.HorizontalHeader().ResizeSection(2, int(width/9))
+	w.tview.HorizontalHeader().ResizeSection(2, int(width/10))
 	w.tview.HorizontalHeader().ResizeSection(3, int(width/5))
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Stretch)
 
@@ -209,10 +231,10 @@ func (w *Gui) document(trans []string) database.Content {
 
 func (w *Gui) keypressevent(e *gui.QKeyEvent) {
 	if e.Key() == int(core.Qt__Key_Escape) {
-		w.qApp.Exit(0)
+		w.qapp.Exit(0)
 	}
 }
 
-func (w *Gui) InitWith(qApp *widgets.QApplication) {
-	w.qApp = qApp
+func (w *Gui) InitWith(qapp *widgets.QApplication) {
+	w.qapp = qapp
 }
