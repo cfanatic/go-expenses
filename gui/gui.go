@@ -21,22 +21,21 @@ type Gui struct {
 	lbutton *widgets.QHBoxLayout
 
 	twidget  *widgets.QTabWidget
+	twinfo   *widgets.QWidget
 	twlabel  *widgets.QWidget
 	twmonth  *widgets.QWidget
 	twyear   *widgets.QWidget
-	twinfo   *widgets.QWidget
-	twlload  *widgets.QHBoxLayout
+	twlinfo  *widgets.QHBoxLayout
+	twllabel *widgets.QHBoxLayout
 	twlmonth *widgets.QHBoxLayout
 	twlyear  *widgets.QHBoxLayout
-	twldebug *widgets.QHBoxLayout
 
-	vlayout *widgets.QVBoxLayout
-	tview   *widgets.QTableView
-	list    *gui.QStandardItemModel
+	tview *widgets.QTableView
+	tlist *gui.QStandardItemModel
 
 	ds    *datasheet.Datasheet
 	db    *database.Database
-	listd []database.Content
+	dlist []database.Content
 
 	_ func() `constructor:"init"`
 
@@ -53,23 +52,15 @@ func (w *Gui) init() {
 	w.lbutton = widgets.NewQHBoxLayout()
 
 	w.twidget = widgets.NewQTabWidget(nil)
+	w.twinfo = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twlabel = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twmonth = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twyear = widgets.NewQWidget(nil, core.Qt__Widget)
-	w.twinfo = widgets.NewQWidget(nil, core.Qt__Widget)
-	w.twlload = widgets.NewQHBoxLayout()
+	w.twlinfo = widgets.NewQHBoxLayout()
+	w.twllabel = widgets.NewQHBoxLayout()
 	w.twlmonth = widgets.NewQHBoxLayout()
 	w.twlyear = widgets.NewQHBoxLayout()
-	w.twldebug = widgets.NewQHBoxLayout()
 
-	w.vlayout = widgets.NewQVBoxLayout()
-	w.tview = widgets.NewQTableView(nil)
-	w.list = gui.NewQStandardItemModel(nil)
-
-	w.tview.SetModel(w.list)
-	w.vlayout.AddWidget(w.tview, 0, 0)
-
-	w.twlabel.SetLayout(w.vlayout)
 	w.twidget.AddTab(w.twinfo, "Info")
 	w.twidget.AddTab(w.twlabel, "Label")
 	w.twidget.AddTab(w.twmonth, "Month")
@@ -77,6 +68,13 @@ func (w *Gui) init() {
 	w.twidget.SetTabEnabled(1, false)
 	w.twidget.SetTabEnabled(2, false)
 	w.twidget.SetTabEnabled(3, false)
+
+	w.tview = widgets.NewQTableView(nil)
+	w.tlist = gui.NewQStandardItemModel(nil)
+
+	w.tview.SetModel(w.tlist)
+	w.twllabel.AddWidget(w.tview, 0, 0)
+	w.twlabel.SetLayout(w.twllabel)
 
 	blabel := widgets.NewQPushButton2("Label", nil)
 	banalyze := widgets.NewQPushButton2("Analyze", nil)
@@ -92,37 +90,8 @@ func (w *Gui) init() {
 	blabel.ConnectClicked(w.label)
 	banalyze.ConnectClicked(w.analyze)
 	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
-	w.list.ConnectItemChanged(w.update)
+	w.tlist.ConnectItemChanged(w.update)
 	w.ConnectKeyPressEvent(w.keypressevent)
-}
-
-func (w *Gui) update(item *gui.QStandardItem) {
-	var trans []string
-
-	trans = make([]string, 0)
-	for col := 0; col < w.list.ColumnCount(core.NewQModelIndex()); col++ {
-		index := w.list.Index(item.Row(), col, core.NewQModelIndex())
-		data := w.list.Data(index, int(core.Qt__DisplayRole))
-		trans = append(trans, data.ToString())
-	}
-
-	dsold := datasheet.Content{
-		Date:   w.listd[item.Row()].Date.Format("01-02-06"),
-		Payee:  w.listd[item.Row()].Payee,
-		Amount: w.listd[item.Row()].Amount,
-	}
-	dsnew := datasheet.Content{
-		Date:   w.document(trans).Date.Format("01-02-06"),
-		Payee:  w.document(trans).Payee,
-		Amount: w.document(trans).Amount,
-	}
-	dbold := w.listd[item.Row()]
-	dbnew := w.document(trans)
-
-	w.ds.Update(dsold, dsnew)
-	w.db.Update(dbold, dbnew)
-
-	w.listd[item.Row()] = w.document(trans)
 }
 
 func (w *Gui) label(bool) {
@@ -167,9 +136,9 @@ func (w *Gui) label(bool) {
 		return
 	}
 
-	if w.list.RowCount(core.NewQModelIndex()) > 0 {
-		w.list.RemoveRows(0, w.list.RowCount(core.NewQModelIndex()), core.NewQModelIndex())
-		w.listd = []database.Content{}
+	if w.tlist.RowCount(core.NewQModelIndex()) > 0 {
+		w.tlist.RemoveRows(0, w.tlist.RowCount(core.NewQModelIndex()), core.NewQModelIndex())
+		w.dlist = []database.Content{}
 	}
 
 	for _, trans := range export {
@@ -193,12 +162,12 @@ func (w *Gui) label(bool) {
 		items[0].SetEditable(false)
 		items[0].SetSelectable(false)
 		items[1].SetToolTip(trans.Description)
-		w.list.AppendRow(items)
-		w.listd = append(w.listd, database.Content{Date: date, Payee: trans.Payee, Amount: trans.Amount})
+		w.tlist.AppendRow(items)
+		w.dlist = append(w.dlist, database.Content{Date: date, Payee: trans.Payee, Amount: trans.Amount})
 	}
 
 	width := float32(w.Geometry().Width())
-	w.list.SetHorizontalHeaderLabels([]string{"Date", "Payee", "Amount", "Label"})
+	w.tlist.SetHorizontalHeaderLabels([]string{"Date", "Payee", "Amount", "Label"})
 	w.tview.HorizontalHeader().SetSectionResizeMode(widgets.QHeaderView__Interactive)
 	w.tview.HorizontalHeader().SetStretchLastSection(true)
 	w.tview.HorizontalHeader().ResizeSection(0, int(width/10))
@@ -208,23 +177,54 @@ func (w *Gui) label(bool) {
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Stretch)
 
 	w.save(true)
+	w.analyze(true)
 }
 
 func (w *Gui) analyze(bool) {
+
 }
 
 func (w *Gui) save(bool) {
-	for row := 0; row < w.list.RowCount(core.NewQModelIndex()); row++ {
+	for row := 0; row < w.tlist.RowCount(core.NewQModelIndex()); row++ {
 		trans := []string{}
-		for col := 0; col < w.list.ColumnCount(core.NewQModelIndex()); col++ {
-			index := w.list.Index(row, col, core.NewQModelIndex())
-			data := w.list.Data(index, int(core.Qt__DisplayRole))
+		for col := 0; col < w.tlist.ColumnCount(core.NewQModelIndex()); col++ {
+			index := w.tlist.Index(row, col, core.NewQModelIndex())
+			data := w.tlist.Data(index, int(core.Qt__DisplayRole))
 			trans = append(trans, data.ToString())
 		}
 		if doc := w.document(trans); len(doc.Label) > 0 {
 			w.db.Save(doc)
 		}
 	}
+}
+
+func (w *Gui) update(item *gui.QStandardItem) {
+	var trans []string
+
+	trans = make([]string, 0)
+	for col := 0; col < w.tlist.ColumnCount(core.NewQModelIndex()); col++ {
+		index := w.tlist.Index(item.Row(), col, core.NewQModelIndex())
+		data := w.tlist.Data(index, int(core.Qt__DisplayRole))
+		trans = append(trans, data.ToString())
+	}
+
+	dsold := datasheet.Content{
+		Date:   w.dlist[item.Row()].Date.Format("01-02-06"),
+		Payee:  w.dlist[item.Row()].Payee,
+		Amount: w.dlist[item.Row()].Amount,
+	}
+	dsnew := datasheet.Content{
+		Date:   w.document(trans).Date.Format("01-02-06"),
+		Payee:  w.document(trans).Payee,
+		Amount: w.document(trans).Amount,
+	}
+	dbold := w.dlist[item.Row()]
+	dbnew := w.document(trans)
+
+	w.ds.Update(dsold, dsnew)
+	w.db.Update(dbold, dbnew)
+
+	w.dlist[item.Row()] = w.document(trans)
 }
 
 func (w *Gui) document(trans []string) database.Content {
