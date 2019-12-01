@@ -70,13 +70,13 @@ func (w *Gui) init() {
 	w.vlayout.AddWidget(w.tview, 0, 0)
 
 	w.twlabel.SetLayout(w.vlayout)
+	w.twidget.AddTab(w.twinfo, "Info")
 	w.twidget.AddTab(w.twlabel, "Label")
 	w.twidget.AddTab(w.twmonth, "Month")
 	w.twidget.AddTab(w.twyear, "Year")
-	w.twidget.AddTab(w.twinfo, "Info")
-	w.twidget.SetTabEnabled(0, false)
 	w.twidget.SetTabEnabled(1, false)
 	w.twidget.SetTabEnabled(2, false)
+	w.twidget.SetTabEnabled(3, false)
 
 	blabel := widgets.NewQPushButton2("Label", nil)
 	bquit := widgets.NewQPushButton2("Quit", nil)
@@ -152,8 +152,8 @@ func (w *Gui) label(bool) {
 	}
 
 	if export, err = w.ds.Content(); err == nil {
-		w.twidget.SetTabEnabled(0, true)
-		w.twidget.SetCurrentIndex(0)
+		w.twidget.SetTabEnabled(1, true)
+		w.twidget.SetCurrentIndex(1)
 	} else {
 		widgets.QMessageBox_Critical(nil,
 			"Cannot import datasheet",
