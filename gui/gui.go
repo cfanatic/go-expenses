@@ -79,15 +79,18 @@ func (w *Gui) init() {
 	w.twidget.SetTabEnabled(3, false)
 
 	blabel := widgets.NewQPushButton2("Label", nil)
+	banalyze := widgets.NewQPushButton2("Analyze", nil)
 	bquit := widgets.NewQPushButton2("Quit", nil)
 
 	w.lbutton.AddWidget(blabel, 0, 0)
+	w.lbutton.AddWidget(banalyze, 0, 0)
 	w.lbutton.AddWidget(bquit, 0, 0)
 	w.lapp.AddWidget(w.twidget, 0, 0)
 	w.lapp.AddLayout(w.lbutton, 0)
 	w.SetLayout(w.lapp)
 
 	blabel.ConnectClicked(w.label)
+	banalyze.ConnectClicked(w.analyze)
 	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
 	w.list.ConnectItemChanged(w.update)
 	w.ConnectKeyPressEvent(w.keypressevent)
@@ -205,6 +208,9 @@ func (w *Gui) label(bool) {
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Stretch)
 
 	w.save(true)
+}
+
+func (w *Gui) analyze(bool) {
 }
 
 func (w *Gui) save(bool) {
