@@ -21,10 +21,10 @@ type Gui struct {
 	lbutton *widgets.QHBoxLayout
 
 	twidget  *widgets.QTabWidget
-	twload   *widgets.QWidget
+	twlabel  *widgets.QWidget
 	twmonth  *widgets.QWidget
 	twyear   *widgets.QWidget
-	twdebug  *widgets.QWidget
+	twinfo   *widgets.QWidget
 	twlload  *widgets.QHBoxLayout
 	twlmonth *widgets.QHBoxLayout
 	twlyear  *widgets.QHBoxLayout
@@ -53,10 +53,10 @@ func (w *Gui) init() {
 	w.lbutton = widgets.NewQHBoxLayout()
 
 	w.twidget = widgets.NewQTabWidget(nil)
-	w.twload = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twlabel = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twmonth = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twyear = widgets.NewQWidget(nil, core.Qt__Widget)
-	w.twdebug = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twinfo = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twlload = widgets.NewQHBoxLayout()
 	w.twlmonth = widgets.NewQHBoxLayout()
 	w.twlyear = widgets.NewQHBoxLayout()
@@ -69,24 +69,25 @@ func (w *Gui) init() {
 	w.tview.SetModel(w.list)
 	w.vlayout.AddWidget(w.tview, 0, 0)
 
-	w.twload.SetLayout(w.vlayout)
-	w.twidget.AddTab(w.twload, "Import")
+	w.twlabel.SetLayout(w.vlayout)
+	w.twidget.AddTab(w.twlabel, "Label")
 	w.twidget.AddTab(w.twmonth, "Month")
 	w.twidget.AddTab(w.twyear, "Year")
-	w.twidget.AddTab(w.twdebug, "Debug")
+	w.twidget.AddTab(w.twinfo, "Info")
+	w.twidget.SetTabEnabled(0, false)
 	w.twidget.SetTabEnabled(1, false)
 	w.twidget.SetTabEnabled(2, false)
 
-	bload := widgets.NewQPushButton2("Load", nil)
+	blabel := widgets.NewQPushButton2("Label", nil)
 	bquit := widgets.NewQPushButton2("Quit", nil)
 
-	w.lbutton.AddWidget(bload, 0, 0)
+	w.lbutton.AddWidget(blabel, 0, 0)
 	w.lbutton.AddWidget(bquit, 0, 0)
 	w.lapp.AddWidget(w.twidget, 0, 0)
 	w.lapp.AddLayout(w.lbutton, 0)
 	w.SetLayout(w.lapp)
 
-	bload.ConnectClicked(w.load)
+	blabel.ConnectClicked(w.label)
 	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
 	w.list.ConnectItemChanged(w.update)
 	w.ConnectKeyPressEvent(w.keypressevent)
@@ -121,7 +122,7 @@ func (w *Gui) update(item *gui.QStandardItem) {
 	w.listd[item.Row()] = w.document(trans)
 }
 
-func (w *Gui) load(bool) {
+func (w *Gui) label(bool) {
 	var export []datasheet.Content
 	var err error
 
@@ -151,8 +152,8 @@ func (w *Gui) load(bool) {
 	}
 
 	if export, err = w.ds.Content(); err == nil {
-		w.twidget.SetTabEnabled(1, true)
-		w.twidget.SetTabEnabled(2, true)
+		w.twidget.SetTabEnabled(0, true)
+		w.twidget.SetCurrentIndex(0)
 	} else {
 		widgets.QMessageBox_Critical(nil,
 			"Cannot import datasheet",
