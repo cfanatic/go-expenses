@@ -13,6 +13,12 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
+const (
+	NORMAL = iota
+	BOLD
+	UNDERLINE
+)
+
 type Gui struct {
 	widgets.QWidget
 
@@ -181,7 +187,46 @@ func (w *Gui) label(bool) {
 }
 
 func (w *Gui) analyze(bool) {
+	row := func(style int, items ...string) *widgets.QWidget {
+		widget := widgets.NewQWidget(nil, 0)
+		layout := widgets.NewQHBoxLayout()
+		for _, item := range items {
+			label := widgets.NewQLabel2(item, nil, core.Qt__Widget)
+			switch font := label.Font(); style {
+			case BOLD:
+				font.SetBold(true)
+				label.SetFont(font)
+			case UNDERLINE:
+				font.SetUnderline(true)
+				label.SetFont(font)
+			default:
+			}
+			layout.AddWidget(label, 0, 0)
+		}
+		widget.SetLayout(layout)
+		return widget
+	}
 
+	sarea := widgets.NewQScrollArea(nil)
+	swidget := widgets.NewQWidget(nil, 0)
+	slayout := widgets.NewQVBoxLayout2(swidget)
+
+	dateIn := w.dlist[len(w.dlist)-1].Date
+	// dateOut := w.dlist[0].Date
+
+	slayout.AddWidget(row(BOLD, fmt.Sprintf("%s %d", dateIn.Month(), dateIn.Year())), 0, 0)
+	slayout.AddWidget(row(UNDERLINE, "Label", "Euro / Month", "Percent / Month", "Count / Month"), 0, 0)
+	slayout.AddStretch(1)
+	slayout.AddWidget(row(NORMAL, "Test", "100.00", "15%", "7"), 0, 0)
+
+	sarea.SetWidget(swidget)
+	sarea.SetWidgetResizable(true)
+
+	mlayout := widgets.NewQVBoxLayout()
+	mlayout.AddWidget(sarea, 0, 0)
+	w.twmonth.SetLayout(mlayout)
+
+	w.twidget.SetTabEnabled(2, true)
 }
 
 func (w *Gui) save(bool) {
