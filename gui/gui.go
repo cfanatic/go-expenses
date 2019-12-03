@@ -2,6 +2,8 @@ package gui
 
 import (
 	"fmt"
+	"math"
+	"sort"
 	"strconv"
 	"time"
 
@@ -17,6 +19,10 @@ const (
 	NORMAL = iota
 	BOLD
 	UNDERLINE
+)
+
+var (
+	FILTER = []string{""}
 )
 
 type Gui struct {
@@ -183,7 +189,7 @@ func (w *Gui) label(bool) {
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Stretch)
 
 	w.save(true)
-	w.analyze(true)
+	// w.analyze(true)
 }
 
 func (w *Gui) analyze(bool) {
@@ -213,11 +219,41 @@ func (w *Gui) analyze(bool) {
 
 	dateIn := w.dlist[len(w.dlist)-1].Date
 	// dateOut := w.dlist[0].Date
+	labels, _ := w.db.Labels("label")
+	cnt := make(map[string]int)
+	res := make(map[string]float64)
+	tot := float64(0.0)
 
-	slayout.AddWidget(row(BOLD, fmt.Sprintf("%s %d", dateIn.Month(), dateIn.Year())), 0, 0)
-	slayout.AddWidget(row(UNDERLINE, "Label", "Euro / Month", "Percent / Month", "Count / Month"), 0, 0)
-	slayout.AddStretch(1)
-	slayout.AddWidget(row(NORMAL, "Test", "100.00", "15%", "7"), 0, 0)
+	// analyze
+	for _, label := range labels {
+		content, _ := w.db.Content("label", label.(string), "02-01-19", "02-28-19")
+		cnt[label.(string)] = len(content)
+		for _, trans := range content {
+			res[trans.Label] = res[trans.Label] + (-1.0 * float64(trans.Amount))
+			tot = tot + (-1.0 * float64(trans.Amount))
+		}
+	}
+	// filter
+	for _, label := range FILTER {
+		tot = tot - res[label]
+		delete(res, label)
+	}
+	// sort
+	cats := make([]string, 0, len(res))
+	for cat := range res {
+		cats = append(cats, cat)
+	}
+	sort.Strings(cats)
+
+	slayout.AddWidget(row(UNDERLINE, fmt.Sprintf("%s %d", dateIn.Month(), dateIn.Year()), "Euro / Month", "Percent / Month", "Count / Month"), 0, 0)
+	// slayout.AddStretch(1)
+	for _, cat := range cats {
+		slayout.AddWidget(row(NORMAL,
+			fmt.Sprintf("%s", cat),
+			fmt.Sprintf("%.2f", res[cat]),
+			fmt.Sprintf("%.f", math.Round(res[cat]/tot*100)),
+			fmt.Sprintf("%d", cnt[cat])), 0, 0)
+	}
 
 	sarea.SetWidget(swidget)
 	sarea.SetWidgetResizable(true)
@@ -227,6 +263,7 @@ func (w *Gui) analyze(bool) {
 	w.twmonth.SetLayout(mlayout)
 
 	w.twidget.SetTabEnabled(2, true)
+	w.twidget.SetCurrentIndex(2)
 }
 
 func (w *Gui) save(bool) {
