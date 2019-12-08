@@ -32,15 +32,15 @@ type Gui struct {
 	lapp    *widgets.QVBoxLayout
 	lbutton *widgets.QHBoxLayout
 
-	twidget  *widgets.QTabWidget
-	twinfo   *widgets.QWidget
-	twlabel  *widgets.QWidget
-	twmonth  *widgets.QWidget
-	twyear   *widgets.QWidget
-	twlinfo  *widgets.QHBoxLayout
-	twllabel *widgets.QHBoxLayout
-	twlmonth *widgets.QVBoxLayout
-	twlyear  *widgets.QHBoxLayout
+	twidget   *widgets.QTabWidget
+	twinfo    *widgets.QWidget
+	twimport  *widgets.QWidget
+	twmonth   *widgets.QWidget
+	twyear    *widgets.QWidget
+	twlinfo   *widgets.QHBoxLayout
+	twlimport *widgets.QHBoxLayout
+	twlmonth  *widgets.QVBoxLayout
+	twlyear   *widgets.QHBoxLayout
 
 	tview *widgets.QTableView
 	tlist *gui.QStandardItemModel
@@ -65,16 +65,16 @@ func (w *Gui) init() {
 
 	w.twidget = widgets.NewQTabWidget(nil)
 	w.twinfo = widgets.NewQWidget(nil, core.Qt__Widget)
-	w.twlabel = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twimport = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twmonth = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twyear = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twlinfo = widgets.NewQHBoxLayout()
-	w.twllabel = widgets.NewQHBoxLayout()
+	w.twlimport = widgets.NewQHBoxLayout()
 	w.twlmonth = widgets.NewQVBoxLayout()
 	w.twlyear = widgets.NewQHBoxLayout()
 
 	w.twidget.AddTab(w.twinfo, "Info")
-	w.twidget.AddTab(w.twlabel, "Label")
+	w.twidget.AddTab(w.twimport, "Import")
 	w.twidget.AddTab(w.twmonth, "Month")
 	w.twidget.AddTab(w.twyear, "Year")
 	w.twidget.SetTabEnabled(1, false)
@@ -87,15 +87,13 @@ func (w *Gui) init() {
 	w.tlist = gui.NewQStandardItemModel(nil)
 
 	w.tview.SetModel(w.tlist)
-	w.twllabel.AddWidget(w.tview, 0, 0)
-	w.twlabel.SetLayout(w.twllabel)
+	w.twlimport.AddWidget(w.tview, 0, 0)
+	w.twimport.SetLayout(w.twlimport)
 
-	blabel := widgets.NewQPushButton2("Label", nil)
-	banalyze := widgets.NewQPushButton2("Analyze", nil)
+	bimport := widgets.NewQPushButton2("Import", nil)
 	bquit := widgets.NewQPushButton2("Quit", nil)
 
-	w.lbutton.AddWidget(blabel, 0, 0)
-	w.lbutton.AddWidget(banalyze, 0, 0)
+	w.lbutton.AddWidget(bimport, 0, 0)
 	w.lbutton.AddWidget(bquit, 0, 0)
 	w.lapp.AddWidget(w.twidget, 0, 0)
 	w.lapp.AddLayout(w.lbutton, 0)
@@ -103,12 +101,12 @@ func (w *Gui) init() {
 
 	w.twidget.ConnectTabBarClicked(w.analyze)
 	w.tlist.ConnectItemChanged(w.update)
-	blabel.ConnectClicked(w.label)
+	bimport.ConnectClicked(w.importxlsx)
 	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
 	w.ConnectKeyPressEvent(w.keypressevent)
 }
 
-func (w *Gui) label(bool) {
+func (w *Gui) importxlsx(bool) {
 	var export []datasheet.Content
 	var err error
 
