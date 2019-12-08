@@ -251,7 +251,6 @@ func (w *Gui) analyze(index int) {
 	sort.Strings(cats)
 
 	slayout.AddWidget(row(UNDERLINE, fmt.Sprintf("%s %d", dateIn.Month(), dateIn.Year()), "Euro / Month", "Percent / Month", "Count / Month"), 0, 0)
-	// slayout.AddStretch(1)
 	for _, cat := range cats {
 		slayout.AddWidget(row(NORMAL,
 			fmt.Sprintf("%s", cat),
@@ -259,6 +258,8 @@ func (w *Gui) analyze(index int) {
 			fmt.Sprintf("%.f", math.Round(res[cat]/tot*100)),
 			fmt.Sprintf("%d", cnt[cat])), 0, 0)
 	}
+	spacer := widgets.NewQSpacerItem(0, 0, widgets.QSizePolicy__Minimum, widgets.QSizePolicy__Expanding)
+	slayout.AddSpacerItem(spacer)
 
 	sarea.SetWidget(swidget)
 	sarea.SetWidgetResizable(true)
