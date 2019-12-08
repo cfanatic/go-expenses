@@ -39,7 +39,7 @@ type Gui struct {
 	twyear   *widgets.QWidget
 	twlinfo  *widgets.QHBoxLayout
 	twllabel *widgets.QHBoxLayout
-	twlmonth *widgets.QHBoxLayout
+	twlmonth *widgets.QVBoxLayout
 	twlyear  *widgets.QHBoxLayout
 
 	tview *widgets.QTableView
@@ -70,7 +70,7 @@ func (w *Gui) init() {
 	w.twyear = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twlinfo = widgets.NewQHBoxLayout()
 	w.twllabel = widgets.NewQHBoxLayout()
-	w.twlmonth = widgets.NewQHBoxLayout()
+	w.twlmonth = widgets.NewQVBoxLayout()
 	w.twlyear = widgets.NewQHBoxLayout()
 
 	w.twidget.AddTab(w.twinfo, "Info")
@@ -80,6 +80,8 @@ func (w *Gui) init() {
 	w.twidget.SetTabEnabled(1, false)
 	w.twidget.SetTabEnabled(2, false)
 	w.twidget.SetTabEnabled(3, false)
+
+	w.twmonth.SetLayout(w.twlmonth)
 
 	w.tview = widgets.NewQTableView(nil)
 	w.tlist = gui.NewQStandardItemModel(nil)
@@ -99,10 +101,10 @@ func (w *Gui) init() {
 	w.lapp.AddLayout(w.lbutton, 0)
 	w.SetLayout(w.lapp)
 
-	blabel.ConnectClicked(w.label)
-	banalyze.ConnectClicked(w.analyze)
-	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
+	w.twidget.ConnectTabBarClicked(w.analyze)
 	w.tlist.ConnectItemChanged(w.update)
+	blabel.ConnectClicked(w.label)
+	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
 	w.ConnectKeyPressEvent(w.keypressevent)
 }
 
@@ -137,6 +139,7 @@ func (w *Gui) label(bool) {
 
 	if export, err = w.ds.Content(); err == nil {
 		w.twidget.SetTabEnabled(1, true)
+		w.twidget.SetTabEnabled(2, true)
 		w.twidget.SetCurrentIndex(1)
 	} else {
 		widgets.QMessageBox_Critical(nil,
@@ -189,10 +192,12 @@ func (w *Gui) label(bool) {
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Stretch)
 
 	w.save(true)
-	// w.analyze(true)
 }
 
-func (w *Gui) analyze(bool) {
+func (w *Gui) analyze(index int) {
+	if w.twidget.TabText(index) != "Month" {
+		return
+	}
 	row := func(style int, items ...string) *widgets.QWidget {
 		widget := widgets.NewQWidget(nil, 0)
 		layout := widgets.NewQHBoxLayout()
@@ -218,7 +223,7 @@ func (w *Gui) analyze(bool) {
 	slayout := widgets.NewQVBoxLayout2(swidget)
 
 	dateIn := w.dlist[len(w.dlist)-1].Date
-	// dateOut := w.dlist[0].Date
+	dateOut := w.dlist[0].Date
 	labels, _ := w.db.Labels("label")
 	cnt := make(map[string]int)
 	res := make(map[string]float64)
@@ -226,7 +231,7 @@ func (w *Gui) analyze(bool) {
 
 	// analyze
 	for _, label := range labels {
-		content, _ := w.db.Content("label", label.(string), "02-01-19", "02-28-19")
+		content, _ := w.db.Content("label", label.(string), dateIn.Format("01-02-06"), dateOut.Format("01-02-06"))
 		cnt[label.(string)] = len(content)
 		for _, trans := range content {
 			res[trans.Label] = res[trans.Label] + (-1.0 * float64(trans.Amount))
@@ -258,12 +263,12 @@ func (w *Gui) analyze(bool) {
 	sarea.SetWidget(swidget)
 	sarea.SetWidgetResizable(true)
 
-	mlayout := widgets.NewQVBoxLayout()
-	mlayout.AddWidget(sarea, 0, 0)
-	w.twmonth.SetLayout(mlayout)
-
-	w.twidget.SetTabEnabled(2, true)
-	w.twidget.SetCurrentIndex(2)
+	if w.twlmonth.Count() > 0 {
+		tmp := w.twlmonth.ItemAt(0).Widget()
+		tmp.Hide()
+		w.twlmonth.RemoveWidget(tmp)
+	}
+	w.twlmonth.InsertWidget(0, sarea, 0, 0)
 }
 
 func (w *Gui) save(bool) {
