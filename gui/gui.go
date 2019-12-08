@@ -198,6 +198,7 @@ func (w *Gui) analyze(index int) {
 	if w.twidget.TabText(index) != "Month" {
 		return
 	}
+
 	row := func(style int, items ...string) *widgets.QWidget {
 		widget := widgets.NewQWidget(nil, 0)
 		layout := widgets.NewQHBoxLayout()
@@ -254,8 +255,8 @@ func (w *Gui) analyze(index int) {
 	for _, cat := range cats {
 		slayout.AddWidget(row(NORMAL,
 			fmt.Sprintf("%s", cat),
-			fmt.Sprintf("%.2f", res[cat]),
-			fmt.Sprintf("%.f", math.Round(res[cat]/tot*100)),
+			fmt.Sprintf("%.f €", res[cat]),
+			fmt.Sprintf("%.f %%", math.Round(res[cat]/tot*100)),
 			fmt.Sprintf("%d", cnt[cat])), 0, 0)
 	}
 	spacer := widgets.NewQSpacerItem(0, 0, widgets.QSizePolicy__Minimum, widgets.QSizePolicy__Expanding)
