@@ -138,6 +138,7 @@ func (w *Gui) importxlsx(bool) {
 	if export, err = w.ds.Content(); err == nil {
 		w.twidget.SetTabEnabled(1, true)
 		w.twidget.SetTabEnabled(2, true)
+		w.twidget.SetTabEnabled(3, true)
 		w.twidget.SetCurrentIndex(1)
 	} else {
 		widgets.QMessageBox_Critical(nil,
@@ -226,7 +227,8 @@ func (w *Gui) analyze(index int) {
 	labels, _ := w.db.Labels("label")
 	cnt := make(map[string]int)
 	res := make(map[string]float64)
-	tot := float64(0.0)
+	totcnt := int(0)
+	totres := float64(0.0)
 
 	// analyze
 	for _, label := range labels {
@@ -234,12 +236,13 @@ func (w *Gui) analyze(index int) {
 		cnt[label.(string)] = len(content)
 		for _, trans := range content {
 			res[trans.Label] = res[trans.Label] + (-1.0 * float64(trans.Amount))
-			tot = tot + (-1.0 * float64(trans.Amount))
+			totres = totres + (-1.0 * float64(trans.Amount))
 		}
+		totcnt = totcnt + len(content)
 	}
 	// filter
 	for _, label := range FILTER {
-		tot = tot - res[label]
+		totres = totres - res[label]
 		delete(res, label)
 	}
 	// sort
@@ -254,9 +257,10 @@ func (w *Gui) analyze(index int) {
 		slayout.AddWidget(row(NORMAL,
 			fmt.Sprintf("%s", cat),
 			fmt.Sprintf("%.f €", res[cat]),
-			fmt.Sprintf("%.f %%", math.Round(res[cat]/tot*100)),
+			fmt.Sprintf("%.f %%", math.Round(res[cat]/totres*100)),
 			fmt.Sprintf("%d", cnt[cat])), 0, 0)
 	}
+	slayout.AddWidget(row(BOLD, "Total", fmt.Sprintf("%.0f €", totres), "100 %", fmt.Sprintf("%d", totcnt)), 0, 0)
 	spacer := widgets.NewQSpacerItem(0, 0, widgets.QSizePolicy__Minimum, widgets.QSizePolicy__Expanding)
 	slayout.AddSpacerItem(spacer)
 
