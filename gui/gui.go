@@ -2,9 +2,8 @@ package gui
 
 import (
 	"fmt"
-	"math"
-	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/cfanatic/go-expense/account"
@@ -49,6 +48,9 @@ type Gui struct {
 	db    *database.Database
 	dlist []database.Content
 
+	sfile string
+	spath string
+
 	_ func() `constructor:"init"`
 
 	_ func() `slot:"connect"`
@@ -82,6 +84,7 @@ func (w *Gui) init() {
 	w.twidget.SetTabEnabled(3, false)
 
 	w.twmonth.SetLayout(w.twlmonth)
+	w.twyear.SetLayout(w.twlyear)
 
 	w.tview = widgets.NewQTableView(nil)
 	w.tlist = gui.NewQStandardItemModel(nil)
@@ -131,6 +134,9 @@ func (w *Gui) importxlsx(bool) {
 			)
 			return
 		}
+		tmp := strings.Split(f[0], "/")
+		w.sfile = tmp[len(tmp)-1]
+		w.spath = core.NewQFileInfo3(f[0]).AbsoluteDir().AbsolutePath()
 	} else {
 		return
 	}
@@ -194,85 +200,12 @@ func (w *Gui) importxlsx(bool) {
 }
 
 func (w *Gui) analyze(index int) {
-	if w.twidget.TabText(index) != "Month" {
-		return
+	switch w.twidget.TabText(index) {
+	case "Month":
+		w.month()
+	case "Year":
+		w.year()
 	}
-
-	row := func(style int, items ...string) *widgets.QWidget {
-		widget := widgets.NewQWidget(nil, 0)
-		layout := widgets.NewQHBoxLayout()
-		for _, item := range items {
-			label := widgets.NewQLabel2(item, nil, core.Qt__Widget)
-			switch font := label.Font(); style {
-			case BOLD:
-				font.SetBold(true)
-				label.SetFont(font)
-			case UNDERLINE:
-				font.SetUnderline(true)
-				label.SetFont(font)
-			default:
-			}
-			layout.AddWidget(label, 0, 0)
-		}
-		widget.SetLayout(layout)
-		return widget
-	}
-
-	sarea := widgets.NewQScrollArea(nil)
-	swidget := widgets.NewQWidget(nil, 0)
-	slayout := widgets.NewQVBoxLayout2(swidget)
-
-	dateIn := w.dlist[len(w.dlist)-1].Date
-	dateOut := w.dlist[0].Date
-	labels, _ := w.db.Labels("label")
-	cnt := make(map[string]int)
-	res := make(map[string]float64)
-	totcnt := int(0)
-	totres := float64(0.0)
-
-	// analyze
-	for _, label := range labels {
-		content, _ := w.db.Content("label", label.(string), dateIn.Format("01-02-06"), dateOut.Format("01-02-06"))
-		cnt[label.(string)] = len(content)
-		for _, trans := range content {
-			res[trans.Label] = res[trans.Label] + (-1.0 * float64(trans.Amount))
-			totres = totres + (-1.0 * float64(trans.Amount))
-		}
-		totcnt = totcnt + len(content)
-	}
-	// filter
-	for _, label := range FILTER {
-		totres = totres - res[label]
-		delete(res, label)
-	}
-	// sort
-	cats := make([]string, 0, len(res))
-	for cat := range res {
-		cats = append(cats, cat)
-	}
-	sort.Strings(cats)
-
-	slayout.AddWidget(row(UNDERLINE, fmt.Sprintf("%s %d", dateIn.Month(), dateIn.Year()), "Euro / Month", "Percent / Month", "Count / Month"), 0, 0)
-	for _, cat := range cats {
-		slayout.AddWidget(row(NORMAL,
-			fmt.Sprintf("%s", cat),
-			fmt.Sprintf("%.f €", res[cat]),
-			fmt.Sprintf("%.f %%", math.Round(res[cat]/totres*100)),
-			fmt.Sprintf("%d", cnt[cat])), 0, 0)
-	}
-	slayout.AddWidget(row(BOLD, "Total", fmt.Sprintf("%.0f €", totres), "100 %", fmt.Sprintf("%d", totcnt)), 0, 0)
-	spacer := widgets.NewQSpacerItem(0, 0, widgets.QSizePolicy__Minimum, widgets.QSizePolicy__Expanding)
-	slayout.AddSpacerItem(spacer)
-
-	sarea.SetWidget(swidget)
-	sarea.SetWidgetResizable(true)
-
-	if w.twlmonth.Count() > 0 {
-		tmp := w.twlmonth.ItemAt(0).Widget()
-		tmp.Hide()
-		w.twlmonth.RemoveWidget(tmp)
-	}
-	w.twlmonth.InsertWidget(0, sarea, 0, 0)
 }
 
 func (w *Gui) save(bool) {
