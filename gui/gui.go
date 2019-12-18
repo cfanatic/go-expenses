@@ -2,7 +2,6 @@ package gui
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -31,15 +30,15 @@ type Gui struct {
 	lapp    *widgets.QVBoxLayout
 	lbutton *widgets.QHBoxLayout
 
-	twidget   *widgets.QTabWidget
-	twinfo    *widgets.QWidget
-	twimport  *widgets.QWidget
-	twmonth   *widgets.QWidget
-	twyear    *widgets.QWidget
-	twlinfo   *widgets.QHBoxLayout
-	twlimport *widgets.QHBoxLayout
-	twlmonth  *widgets.QVBoxLayout
-	twlyear   *widgets.QHBoxLayout
+	twidget  *widgets.QTabWidget
+	twinfo   *widgets.QWidget
+	twlabel  *widgets.QWidget
+	twmonth  *widgets.QWidget
+	twyear   *widgets.QWidget
+	twlinfo  *widgets.QHBoxLayout
+	twllabel *widgets.QHBoxLayout
+	twlmonth *widgets.QVBoxLayout
+	twlyear  *widgets.QHBoxLayout
 
 	tview *widgets.QTableView
 	tlist *gui.QStandardItemModel
@@ -67,16 +66,16 @@ func (w *Gui) init() {
 
 	w.twidget = widgets.NewQTabWidget(nil)
 	w.twinfo = widgets.NewQWidget(nil, core.Qt__Widget)
-	w.twimport = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twlabel = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twmonth = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twyear = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twlinfo = widgets.NewQHBoxLayout()
-	w.twlimport = widgets.NewQHBoxLayout()
+	w.twllabel = widgets.NewQHBoxLayout()
 	w.twlmonth = widgets.NewQVBoxLayout()
 	w.twlyear = widgets.NewQHBoxLayout()
 
 	w.twidget.AddTab(w.twinfo, "Info")
-	w.twidget.AddTab(w.twimport, "Import")
+	w.twidget.AddTab(w.twlabel, "Label")
 	w.twidget.AddTab(w.twmonth, "Month")
 	w.twidget.AddTab(w.twyear, "Year")
 	w.twidget.SetTabEnabled(1, false)
@@ -90,13 +89,13 @@ func (w *Gui) init() {
 	w.tlist = gui.NewQStandardItemModel(nil)
 
 	w.tview.SetModel(w.tlist)
-	w.twlimport.AddWidget(w.tview, 0, 0)
-	w.twimport.SetLayout(w.twlimport)
+	w.twllabel.AddWidget(w.tview, 0, 0)
+	w.twlabel.SetLayout(w.twllabel)
 
-	bimport := widgets.NewQPushButton2("Import", nil)
+	blabel := widgets.NewQPushButton2("Label", nil)
 	bquit := widgets.NewQPushButton2("Quit", nil)
 
-	w.lbutton.AddWidget(bimport, 0, 0)
+	w.lbutton.AddWidget(blabel, 0, 0)
 	w.lbutton.AddWidget(bquit, 0, 0)
 	w.lapp.AddWidget(w.twidget, 0, 0)
 	w.lapp.AddLayout(w.lbutton, 0)
@@ -104,12 +103,12 @@ func (w *Gui) init() {
 
 	w.twidget.ConnectTabBarClicked(w.analyze)
 	w.tlist.ConnectItemChanged(w.update)
-	bimport.ConnectClicked(w.importxlsx)
+	blabel.ConnectClicked(w.label)
 	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
 	w.ConnectKeyPressEvent(w.keypressevent)
 }
 
-func (w *Gui) importxlsx(bool) {
+func (w *Gui) label(bool) {
 	var export []datasheet.Content
 	var err error
 
@@ -199,15 +198,6 @@ func (w *Gui) importxlsx(bool) {
 	w.save(true)
 }
 
-func (w *Gui) analyze(index int) {
-	switch w.twidget.TabText(index) {
-	case "Month":
-		w.month()
-	case "Year":
-		w.year()
-	}
-}
-
 func (w *Gui) save(bool) {
 	for row := 0; row < w.tlist.RowCount(core.NewQModelIndex()); row++ {
 		trans := []string{}
@@ -251,12 +241,13 @@ func (w *Gui) update(item *gui.QStandardItem) {
 	w.dlist[item.Row()] = w.document(trans)
 }
 
-func (w *Gui) document(trans []string) database.Content {
-	date, _ := time.Parse("01-02-06", trans[0])
-	payee := trans[1]
-	amount, _ := strconv.ParseFloat(trans[2], 32)
-	label := trans[3]
-	return database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label}
+func (w *Gui) analyze(index int) {
+	switch w.twidget.TabText(index) {
+	case "Month":
+		w.month()
+	case "Year":
+		w.year()
+	}
 }
 
 func (w *Gui) keypressevent(e *gui.QKeyEvent) {

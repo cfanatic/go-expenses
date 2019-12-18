@@ -2,9 +2,12 @@ package gui
 
 import (
 	"io/ioutil"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/cfanatic/go-expense/account"
+	"github.com/cfanatic/go-expense/database"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 )
@@ -136,4 +139,12 @@ func (w *Gui) year() {
 		w.twlyear.RemoveWidget(tmp)
 	}
 	w.twlyear.InsertWidget(0, sarea, 0, 0)
+}
+
+func (w *Gui) document(trans []string) database.Content {
+	date, _ := time.Parse("01-02-06", trans[0])
+	payee := trans[1]
+	amount, _ := strconv.ParseFloat(trans[2], 32)
+	label := trans[3]
+	return database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label}
 }
