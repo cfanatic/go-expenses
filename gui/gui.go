@@ -32,11 +32,11 @@ type Gui struct {
 
 	twidget  *widgets.QTabWidget
 	twinfo   *widgets.QWidget
-	twlabel  *widgets.QWidget
+	twdata   *widgets.QWidget
 	twmonth  *widgets.QWidget
 	twyear   *widgets.QWidget
 	twlinfo  *widgets.QHBoxLayout
-	twllabel *widgets.QHBoxLayout
+	twldata  *widgets.QHBoxLayout
 	twlmonth *widgets.QVBoxLayout
 	twlyear  *widgets.QHBoxLayout
 
@@ -66,16 +66,16 @@ func (w *Gui) init() {
 
 	w.twidget = widgets.NewQTabWidget(nil)
 	w.twinfo = widgets.NewQWidget(nil, core.Qt__Widget)
-	w.twlabel = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twdata = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twmonth = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twyear = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twlinfo = widgets.NewQHBoxLayout()
-	w.twllabel = widgets.NewQHBoxLayout()
+	w.twldata = widgets.NewQHBoxLayout()
 	w.twlmonth = widgets.NewQVBoxLayout()
 	w.twlyear = widgets.NewQHBoxLayout()
 
 	w.twidget.AddTab(w.twinfo, "Info")
-	w.twidget.AddTab(w.twlabel, "Label")
+	w.twidget.AddTab(w.twdata, "Data")
 	w.twidget.AddTab(w.twmonth, "Month")
 	w.twidget.AddTab(w.twyear, "Year")
 	w.twidget.SetTabEnabled(1, false)
@@ -89,8 +89,8 @@ func (w *Gui) init() {
 	w.tlist = gui.NewQStandardItemModel(nil)
 
 	w.tview.SetModel(w.tlist)
-	w.twllabel.AddWidget(w.tview, 0, 0)
-	w.twlabel.SetLayout(w.twllabel)
+	w.twldata.AddWidget(w.tview, 0, 0)
+	w.twdata.SetLayout(w.twldata)
 
 	blabel := widgets.NewQPushButton2("Label", nil)
 	bquit := widgets.NewQPushButton2("Quit", nil)
