@@ -19,6 +19,12 @@ const (
 	UNDERLINE
 )
 
+const (
+	NONE = iota
+	LABEL
+	LOAD
+)
+
 var (
 	FILTER = []string{""}
 )
@@ -49,6 +55,7 @@ type Gui struct {
 
 	sfile string
 	spath string
+	smode int
 
 	_ func() `constructor:"init"`
 
@@ -93,9 +100,11 @@ func (w *Gui) init() {
 	w.twdata.SetLayout(w.twldata)
 
 	blabel := widgets.NewQPushButton2("Label", nil)
+	bload := widgets.NewQPushButton2("Load", nil)
 	bquit := widgets.NewQPushButton2("Quit", nil)
 
 	w.lbutton.AddWidget(blabel, 0, 0)
+	w.lbutton.AddWidget(bload, 0, 0)
 	w.lbutton.AddWidget(bquit, 0, 0)
 	w.lapp.AddWidget(w.twidget, 0, 0)
 	w.lapp.AddLayout(w.lbutton, 0)
@@ -103,14 +112,18 @@ func (w *Gui) init() {
 
 	w.twidget.ConnectTabBarClicked(w.analyze)
 	w.tlist.ConnectItemChanged(w.update)
-	blabel.ConnectClicked(w.label)
+	blabel.ConnectClicked(func(bool) { w.data(LABEL) })
+	bload.ConnectClicked(func(bool) { w.data(LOAD) })
 	bquit.ConnectClicked(func(bool) { w.qapp.Exit(0) })
+
 	w.ConnectKeyPressEvent(w.keypressevent)
 }
 
-func (w *Gui) label(bool) {
+func (w *Gui) data(mode int) {
 	var export []datasheet.Content
 	var err error
+
+	w.smode = mode
 
 	if f := widgets.QFileDialog_GetOpenFileNames(nil, "Open datasheet", core.QDir_HomePath(), "*.xlsx", "", 0); len(f) > 0 {
 		w.ds = datasheet.New(f[0], account.TAB)
@@ -178,8 +191,16 @@ func (w *Gui) label(bool) {
 			)
 		}
 		date, _ := time.Parse("01-02-06", trans.Date)
-		items[0].SetEditable(false)
-		items[0].SetSelectable(false)
+		switch w.smode {
+		case LABEL:
+			items[0].SetEditable(false)
+			items[0].SetSelectable(false)
+		case LOAD:
+			for i := 0; i < 4; i++ {
+				items[i].SetEditable(false)
+				items[i].SetSelectable(false)
+			}
+		}
 		items[1].SetToolTip(trans.Description)
 		w.tlist.AppendRow(items)
 		w.dlist = append(w.dlist, database.Content{Date: date, Payee: trans.Payee, Amount: trans.Amount})
