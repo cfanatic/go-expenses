@@ -16,6 +16,12 @@ func (w *Gui) month() {
 	var acc account.IAccount
 	var res [][]string
 
+	account.FILTER = []string{}
+	for idx := 0; idx < w.flist.Count(); idx++ {
+		label := w.flist.Item(idx)
+		account.FILTER = append(account.FILTER, label.Text())
+	}
+
 	acc = &account.Expense{Path: w.spath + "/" + w.sfile}
 	acc.Init()
 	acc.Run()
@@ -51,6 +57,12 @@ func (w *Gui) year() {
 	var acc account.IAccount
 	var exps []*account.Expense
 	var res [][]string
+
+	account.FILTER = []string{}
+	for idx := 0; idx < w.flist.Count(); idx++ {
+		label := w.flist.Item(idx)
+		account.FILTER = append(account.FILTER, label.Text())
+	}
 
 	if dir, _ := ioutil.ReadDir(w.spath); len(dir) > 0 {
 		for _, file := range dir {

@@ -36,16 +36,17 @@ type Gui struct {
 	lapp    *widgets.QVBoxLayout
 	lbutton *widgets.QHBoxLayout
 
-	twidget  *widgets.QTabWidget
-	twinfo   *widgets.QWidget
-	twdata   *widgets.QWidget
-	twmonth  *widgets.QWidget
-	twyear   *widgets.QWidget
-	twlinfo  *widgets.QHBoxLayout
-	twldata  *widgets.QHBoxLayout
-	twlmonth *widgets.QVBoxLayout
-	twlyear  *widgets.QHBoxLayout
+	twidget     *widgets.QTabWidget
+	twsettings  *widgets.QWidget
+	twdata      *widgets.QWidget
+	twmonth     *widgets.QWidget
+	twyear      *widgets.QWidget
+	twlsettings *widgets.QVBoxLayout
+	twldata     *widgets.QHBoxLayout
+	twlmonth    *widgets.QVBoxLayout
+	twlyear     *widgets.QHBoxLayout
 
+	flist *widgets.QListWidget
 	tview *widgets.QTableView
 	tlist *gui.QStandardItemModel
 
@@ -72,16 +73,16 @@ func (w *Gui) init() {
 	w.lbutton = widgets.NewQHBoxLayout()
 
 	w.twidget = widgets.NewQTabWidget(nil)
-	w.twinfo = widgets.NewQWidget(nil, core.Qt__Widget)
+	w.twsettings = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twdata = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twmonth = widgets.NewQWidget(nil, core.Qt__Widget)
 	w.twyear = widgets.NewQWidget(nil, core.Qt__Widget)
-	w.twlinfo = widgets.NewQHBoxLayout()
+	w.twlsettings = widgets.NewQVBoxLayout()
 	w.twldata = widgets.NewQHBoxLayout()
 	w.twlmonth = widgets.NewQVBoxLayout()
 	w.twlyear = widgets.NewQHBoxLayout()
 
-	w.twidget.AddTab(w.twinfo, "Info")
+	w.twidget.AddTab(w.twsettings, "Settings")
 	w.twidget.AddTab(w.twdata, "Data")
 	w.twidget.AddTab(w.twmonth, "Month")
 	w.twidget.AddTab(w.twyear, "Year")
@@ -89,13 +90,18 @@ func (w *Gui) init() {
 	w.twidget.SetTabEnabled(2, false)
 	w.twidget.SetTabEnabled(3, false)
 
+	w.twsettings.SetLayout(w.twlsettings)
 	w.twmonth.SetLayout(w.twlmonth)
 	w.twyear.SetLayout(w.twlyear)
+
+	w.flist = widgets.NewQListWidget(nil)
+	w.twlsettings.AddWidget(w.flist, 0, 0)
 
 	w.tview = widgets.NewQTableView(nil)
 	w.tlist = gui.NewQStandardItemModel(nil)
 
 	w.tview.SetModel(w.tlist)
+	w.tview.SetContextMenuPolicy(core.Qt__CustomContextMenu)
 	w.twldata.AddWidget(w.tview, 0, 0)
 	w.twdata.SetLayout(w.twldata)
 
@@ -111,6 +117,8 @@ func (w *Gui) init() {
 	w.SetLayout(w.lapp)
 
 	w.twidget.ConnectTabBarClicked(w.analyze)
+	w.flist.ConnectItemDoubleClicked(w.removefilter)
+	w.tview.ConnectCustomContextMenuRequested(w.addfilter)
 	w.tlist.ConnectItemChanged(w.update)
 	blabel.ConnectClicked(func(bool) { w.data(LABEL) })
 	bload.ConnectClicked(func(bool) { w.data(LOAD) })
@@ -169,6 +177,7 @@ func (w *Gui) data(mode int) {
 	}
 
 	if w.tlist.RowCount(core.NewQModelIndex()) > 0 {
+		w.flist.Clear()
 		w.tlist.RemoveRows(0, w.tlist.RowCount(core.NewQModelIndex()), core.NewQModelIndex())
 		w.dlist = []database.Content{}
 	}
@@ -260,6 +269,32 @@ func (w *Gui) update(item *gui.QStandardItem) {
 	w.db.Update(dbold, dbnew)
 
 	w.dlist[item.Row()] = w.document(trans)
+}
+
+func (w *Gui) addfilter(position *core.QPoint) {
+	menu := widgets.NewQMenu(nil)
+	index := w.tview.IndexAt(position)
+	item := w.tlist.ItemFromIndex(index)
+
+	action := widgets.NewQAction2(fmt.Sprintf("Exclude: %s", item.Text()), w)
+	action.ConnectTriggered(func(bool) {
+		list := w.flist.FindItems(item.Text(), core.Qt__MatchExactly)
+		if len(list) == 0 {
+			row := widgets.NewQListWidgetItem(w.flist, 0)
+			row.SetText(item.Text())
+		}
+	})
+
+	menu.AddActions([]*widgets.QAction{action})
+
+	if item.Column()+1 == 4 {
+		menu.Popup(w.tview.Viewport().MapToGlobal(position), action)
+	}
+}
+
+func (w *Gui) removefilter(item *widgets.QListWidgetItem) {
+	w.flist.TakeItem(w.flist.Row(item))
+	w.flist.RemoveItemWidget(item)
 }
 
 func (w *Gui) analyze(index int) {
