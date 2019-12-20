@@ -16,31 +16,9 @@ func (w *Gui) month() {
 	var acc account.IAccount
 	var res [][]string
 
-	row := func(style int, items ...string) *widgets.QWidget {
-		widget := widgets.NewQWidget(nil, 0)
-		layout := widgets.NewQHBoxLayout()
-		for _, item := range items {
-			label := widgets.NewQLabel2(item, nil, core.Qt__Widget)
-			switch font := label.Font(); style {
-			case BOLD:
-				font.SetBold(true)
-				label.SetFont(font)
-			case UNDERLINE:
-				font.SetUnderline(true)
-				label.SetFont(font)
-			default:
-			}
-			layout.AddWidget(label, 0, 0)
-		}
-		widget.SetLayout(layout)
-		return widget
-	}
-
-	path := w.spath + "/" + w.sfile
-	acc = &account.Expense{Path: path}
+	acc = &account.Expense{Path: w.spath + "/" + w.sfile}
 	acc.Init()
 	acc.Run()
-
 	res = acc.Export()
 
 	sarea := widgets.NewQScrollArea(nil)
@@ -74,30 +52,6 @@ func (w *Gui) year() {
 	var exps []*account.Expense
 	var res [][]string
 
-	row := func(style int, items ...string) *widgets.QWidget {
-		widget := widgets.NewQWidget(nil, 0)
-		layout := widgets.NewQHBoxLayout()
-		for idx, item := range items {
-			label := widgets.NewQLabel2(item, nil, core.Qt__Widget)
-			switch font := label.Font(); style {
-			case BOLD:
-				font.SetBold(true)
-				label.SetFont(font)
-			case UNDERLINE:
-				font.SetUnderline(true)
-				label.SetFont(font)
-			default:
-			}
-			if idx == 1 || idx == len(items)-5 {
-				spacer := widgets.NewQSpacerItem(60, 0, widgets.QSizePolicy__Fixed, widgets.QSizePolicy__Expanding)
-				layout.AddSpacerItem(spacer)
-			}
-			layout.AddWidget(label, 0, 0)
-		}
-		widget.SetLayout(layout)
-		return widget
-	}
-
 	if dir, _ := ioutil.ReadDir(w.spath); len(dir) > 0 {
 		for _, file := range dir {
 			str := strings.Split(file.Name(), ".")
@@ -114,7 +68,6 @@ func (w *Gui) year() {
 		acc.Init()
 		acc.Run()
 	}
-
 	res = acc.Export()
 
 	sarea := widgets.NewQScrollArea(nil)
@@ -123,9 +76,11 @@ func (w *Gui) year() {
 
 	slayout.AddWidget(row(BOLD, res[0]...), 0, 0)
 
-	for idx := 1; idx < len(res); idx++ {
+	for idx := 1; idx < len(res)-2; idx++ {
 		slayout.AddWidget(row(NORMAL, res[idx]...), 0, 0)
 	}
+
+	slayout.AddWidget(row(UNDERLINE, res[len(res)-1]...), 0, 0)
 
 	spacer := widgets.NewQSpacerItem(0, 0, widgets.QSizePolicy__Minimum, widgets.QSizePolicy__Expanding)
 	slayout.AddSpacerItem(spacer)
@@ -147,4 +102,28 @@ func (w *Gui) document(trans []string) database.Content {
 	amount, _ := strconv.ParseFloat(trans[2], 32)
 	label := trans[3]
 	return database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label}
+}
+
+func row(style int, items ...string) *widgets.QWidget {
+	widget := widgets.NewQWidget(nil, 0)
+	layout := widgets.NewQHBoxLayout()
+	for idx, item := range items {
+		label := widgets.NewQLabel2(item, nil, core.Qt__Widget)
+		switch font := label.Font(); style {
+		case BOLD:
+			font.SetBold(true)
+			label.SetFont(font)
+		case UNDERLINE:
+			font.SetUnderline(true)
+			label.SetFont(font)
+		default:
+		}
+		if idx == 1 || idx == len(items)-5 {
+			spacer := widgets.NewQSpacerItem(60, 0, widgets.QSizePolicy__Fixed, widgets.QSizePolicy__Expanding)
+			layout.AddSpacerItem(spacer)
+		}
+		layout.AddWidget(label, 0, 0)
+	}
+	widget.SetLayout(layout)
+	return widget
 }

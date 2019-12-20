@@ -140,7 +140,7 @@ func (w *Gui) data(mode int) {
 		if w.db.Err != nil {
 			widgets.QMessageBox_Critical(nil,
 				"Cannot open database",
-				"Error during database initialization attempt!",
+				"Error during database connection attempt!",
 				widgets.QMessageBox__Default,
 				widgets.QMessageBox__Default,
 			)
