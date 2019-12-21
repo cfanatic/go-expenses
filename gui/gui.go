@@ -210,9 +210,9 @@ func (w *Gui) data(mode int) {
 				items[i].SetSelectable(false)
 			}
 		}
-		items[1].SetToolTip(trans.Description)
+		items[1].SetToolTip(trans.Desc)
 		w.tlist.AppendRow(items)
-		w.dlist = append(w.dlist, database.Content{Date: date, Payee: trans.Payee, Amount: trans.Amount})
+		w.dlist = append(w.dlist, database.Content{Date: date, Payee: trans.Payee, Desc: trans.Desc, Amount: trans.Amount})
 	}
 
 	width := float32(w.Geometry().Width())
@@ -225,10 +225,10 @@ func (w *Gui) data(mode int) {
 	w.tview.HorizontalHeader().ResizeSection(3, int(width/5))
 	w.tview.VerticalHeader().SetSectionResizeMode(widgets.QHeaderView__Stretch)
 
-	w.save(true)
+	w.save()
 }
 
-func (w *Gui) save(bool) {
+func (w *Gui) save() {
 	for row := 0; row < w.tlist.RowCount(core.NewQModelIndex()); row++ {
 		trans := []string{}
 		for col := 0; col < w.tlist.ColumnCount(core.NewQModelIndex()); col++ {
@@ -236,6 +236,7 @@ func (w *Gui) save(bool) {
 			data := w.tlist.Data(index, int(core.Qt__DisplayRole))
 			trans = append(trans, data.ToString())
 		}
+		trans = append(trans, w.tlist.Item(row, 1).ToolTip())
 		if doc := w.document(trans); len(doc.Label) > 0 {
 			w.db.Save(doc)
 		}
@@ -251,15 +252,18 @@ func (w *Gui) update(item *gui.QStandardItem) {
 		data := w.tlist.Data(index, int(core.Qt__DisplayRole))
 		trans = append(trans, data.ToString())
 	}
+	trans = append(trans, w.tlist.Item(item.Row(), 1).ToolTip())
 
 	dsold := datasheet.Content{
 		Date:   w.dlist[item.Row()].Date.Format("01-02-06"),
 		Payee:  w.dlist[item.Row()].Payee,
+		Desc:   w.dlist[item.Row()].Desc,
 		Amount: w.dlist[item.Row()].Amount,
 	}
 	dsnew := datasheet.Content{
 		Date:   w.document(trans).Date.Format("01-02-06"),
 		Payee:  w.document(trans).Payee,
+		Desc:   w.document(trans).Desc,
 		Amount: w.document(trans).Amount,
 	}
 	dbold := w.dlist[item.Row()]

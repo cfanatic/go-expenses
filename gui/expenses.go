@@ -114,9 +114,10 @@ func (w *Gui) year() {
 func (w *Gui) document(trans []string) database.Content {
 	date, _ := time.Parse("01-02-06", trans[0])
 	payee := trans[1]
+	desc := trans[4]
 	amount, _ := strconv.ParseFloat(trans[2], 32)
 	label := trans[3]
-	return database.Content{Date: date, Payee: payee, Amount: float32(amount), Label: label}
+	return database.Content{Date: date, Payee: payee, Desc: desc, Amount: float32(amount), Label: label}
 }
 
 func row(style int, items ...string) *widgets.QWidget {
