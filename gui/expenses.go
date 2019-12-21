@@ -12,15 +12,20 @@ import (
 	"github.com/therecipe/qt/widgets"
 )
 
-func (w *Gui) month() {
-	var acc account.IAccount
-	var res [][]string
-
+func (w *Gui) reset() {
+	account.GUI = true
 	account.FILTER = []string{}
 	for idx := 0; idx < w.flist.Count(); idx++ {
 		label := w.flist.Item(idx)
 		account.FILTER = append(account.FILTER, label.Text())
 	}
+}
+
+func (w *Gui) month() {
+	var acc account.IAccount
+	var res [][]string
+
+	w.reset()
 
 	acc = &account.Expense{Path: w.spath + "/" + w.sfile}
 	acc.Init()
@@ -59,11 +64,7 @@ func (w *Gui) year() {
 	var exps []*account.Expense
 	var res [][]string
 
-	account.FILTER = []string{}
-	for idx := 0; idx < w.flist.Count(); idx++ {
-		label := w.flist.Item(idx)
-		account.FILTER = append(account.FILTER, label.Text())
-	}
+	w.reset()
 
 	if dir, _ := ioutil.ReadDir(w.spath); len(dir) > 0 {
 		for _, file := range dir {
@@ -97,6 +98,7 @@ func (w *Gui) year() {
 
 	spacer := widgets.NewQSpacerItem(0, 0, widgets.QSizePolicy__Minimum, widgets.QSizePolicy__Expanding)
 	slayout.AddSpacerItem(spacer)
+	slayout.AddStretch(1)
 
 	sarea.SetWidget(swidget)
 	sarea.SetWidgetResizable(true)
