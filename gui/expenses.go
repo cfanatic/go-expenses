@@ -41,6 +41,7 @@ func (w *Gui) month() {
 
 	spacer := widgets.NewQSpacerItem(0, 0, widgets.QSizePolicy__Minimum, widgets.QSizePolicy__Expanding)
 	slayout.AddSpacerItem(spacer)
+	slayout.AddStretch(1)
 
 	sarea.SetWidget(swidget)
 	sarea.SetWidgetResizable(true)
