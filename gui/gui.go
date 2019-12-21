@@ -276,19 +276,24 @@ func (w *Gui) addfilter(position *core.QPoint) {
 	index := w.tview.IndexAt(position)
 	item := w.tlist.ItemFromIndex(index)
 
-	action := widgets.NewQAction2(fmt.Sprintf("Exclude: %s", item.Text()), w)
-	action.ConnectTriggered(func(bool) {
-		list := w.flist.FindItems(item.Text(), core.Qt__MatchExactly)
-		if len(list) == 0 {
-			row := widgets.NewQListWidgetItem(w.flist, 0)
-			row.SetText(item.Text())
+	if len(item.Text()) > 0 {
+		action := widgets.NewQAction2(fmt.Sprintf("Exclude: %s", item.Text()), w)
+		action.ConnectTriggered(func(bool) {
+			list := w.flist.FindItems(item.Text(), core.Qt__MatchExactly)
+			if len(list) == 0 {
+				row := widgets.NewQListWidgetItem(w.flist, 0)
+				font := row.Font()
+				font.SetPointSize(font.PointSize() + 0)
+				row.SetFont(font)
+				row.SetText(item.Text())
+			}
+		})
+
+		menu.AddActions([]*widgets.QAction{action})
+
+		if item.Column()+1 == 4 {
+			menu.Popup(w.tview.Viewport().MapToGlobal(position), action)
 		}
-	})
-
-	menu.AddActions([]*widgets.QAction{action})
-
-	if item.Column()+1 == 4 {
-		menu.Popup(w.tview.Viewport().MapToGlobal(position), action)
 	}
 }
 
