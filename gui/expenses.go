@@ -69,7 +69,7 @@ func (w *Gui) year() {
 	if dir, _ := ioutil.ReadDir(w.spath); len(dir) > 0 {
 		for _, file := range dir {
 			str := strings.Split(file.Name(), ".")
-			if strings.Contains(str[0], "~$") || str[1] != "xlsx" {
+			if len(str) == 1 || strings.Contains(str[0], "~$") || str[1] != "xlsx" {
 				continue
 			}
 			path := w.spath + "/" + file.Name()

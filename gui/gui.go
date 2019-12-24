@@ -266,7 +266,7 @@ func (w *Gui) update(item *gui.QStandardItem) {
 		data := w.tlist.Data(index, int(core.Qt__DisplayRole))
 		trans = append(trans, data.ToString())
 	}
-	trans = append(trans, w.tlist.Item(item.Row(), 1).ToolTip(), "n/a")
+	trans = append(trans, w.tlist.Item(item.Row(), 1).ToolTip(), "id_not_known_yet")
 
 	dsold := datasheet.Content{
 		Date:   w.dlist[item.Row()].Date.Format("01-02-06"),
