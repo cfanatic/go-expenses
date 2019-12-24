@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -121,6 +122,30 @@ func (w *Gui) document(trans []string) database.Content {
 		Amount:    float32(amount),
 		Label:     trans[3],
 		Datasheet: trans[5],
+	}
+}
+
+func (w *Gui) integrity() {
+	dateIn := w.dlist[len(w.dlist)-1].Date
+	dateOut := w.dlist[0].Date
+
+	remote, _ := w.db.Content("", "", dateIn.Format("01-02-06"), dateOut.Format("01-02-06"))
+	local := []string{}
+
+	for row := 0; row < w.tlist.RowCount(core.NewQModelIndex()); row++ {
+		index := w.tlist.Index(row, 3, core.NewQModelIndex())
+		data := w.tlist.Data(index, int(core.Qt__DisplayRole))
+		if len(data.ToString()) > 0 {
+			local = append(local, data.ToString())
+		}
+	}
+
+	if len(remote) == len(local) {
+		w.lwarning.SetVisible(false)
+	} else {
+		w.lwarning.SetText(fmt.Sprintf("REDUNDANT DATA: R-%d L-%d", len(remote), len(local)))
+		w.lwarning.SetStyleSheet("font-weight: bold; color: red")
+		w.lwarning.SetVisible(true)
 	}
 }
 

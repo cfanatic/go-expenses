@@ -35,6 +35,7 @@ type Gui struct {
 	qapp    *widgets.QApplication
 	lapp    *widgets.QVBoxLayout
 	lbutton *widgets.QHBoxLayout
+	llabel  *widgets.QHBoxLayout
 
 	twidget     *widgets.QTabWidget
 	twsettings  *widgets.QWidget
@@ -49,6 +50,8 @@ type Gui struct {
 	flist *widgets.QListWidget
 	tview *widgets.QTableView
 	tlist *gui.QStandardItemModel
+
+	lwarning *widgets.QLabel
 
 	ds    *datasheet.Datasheet
 	db    *database.Database
@@ -71,6 +74,7 @@ func (w *Gui) init() {
 
 	w.lapp = widgets.NewQVBoxLayout()
 	w.lbutton = widgets.NewQHBoxLayout()
+	w.llabel = widgets.NewQHBoxLayout()
 
 	w.twidget = widgets.NewQTabWidget(nil)
 	w.twsettings = widgets.NewQWidget(nil, core.Qt__Widget)
@@ -109,11 +113,16 @@ func (w *Gui) init() {
 	bload := widgets.NewQPushButton2("Load", nil)
 	bquit := widgets.NewQPushButton2("Quit", nil)
 
+	w.lwarning = widgets.NewQLabel(nil, core.Qt__Widget)
+	w.lwarning.SetVisible(false)
+
 	w.lbutton.AddWidget(blabel, 0, 0)
 	w.lbutton.AddWidget(bload, 0, 0)
 	w.lbutton.AddWidget(bquit, 0, 0)
+	w.llabel.AddWidget(w.lwarning, 0, core.Qt__AlignCenter)
 	w.lapp.AddWidget(w.twidget, 0, 0)
 	w.lapp.AddLayout(w.lbutton, 0)
+	w.lapp.AddLayout(w.llabel, 0)
 	w.SetLayout(w.lapp)
 
 	w.twidget.ConnectTabBarClicked(w.analyze)
@@ -255,6 +264,7 @@ func (w *Gui) save() {
 			w.db.Save(doc)
 		}
 	}
+	w.integrity()
 }
 
 func (w *Gui) update(item *gui.QStandardItem) {
@@ -284,11 +294,21 @@ func (w *Gui) update(item *gui.QStandardItem) {
 	trans[5] = w.db.Hash(dsnew)
 	dbold := w.dlist[item.Row()]
 	dbnew := w.document(trans)
+	w.dlist[item.Row()] = dbnew
 
 	w.ds.Update(dsold, dsnew)
 	w.db.Update(dbold, dbnew)
 
-	w.dlist[item.Row()] = w.document(trans)
+	w.integrity()
+}
+
+func (w *Gui) analyze(index int) {
+	switch w.twidget.TabText(index) {
+	case "Month":
+		w.month()
+	case "Year":
+		w.year()
+	}
 }
 
 func (w *Gui) addfilter(position *core.QPoint) {
@@ -320,15 +340,6 @@ func (w *Gui) addfilter(position *core.QPoint) {
 func (w *Gui) removefilter(item *widgets.QListWidgetItem) {
 	w.flist.TakeItem(w.flist.Row(item))
 	w.flist.RemoveItemWidget(item)
-}
-
-func (w *Gui) analyze(index int) {
-	switch w.twidget.TabText(index) {
-	case "Month":
-		w.month()
-	case "Year":
-		w.year()
-	}
 }
 
 func (w *Gui) keypressevent(e *gui.QKeyEvent) {
