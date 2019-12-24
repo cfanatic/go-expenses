@@ -184,7 +184,15 @@ func (w *Gui) data(mode int) {
 
 	for _, trans := range export {
 		items := []*gui.QStandardItem{}
-		if item, err := w.db.Document("payee", trans.Payee); err == nil {
+		id := w.db.Hash(trans)
+		if item, err := w.db.Document("datasheet", id); err == nil {
+			items = append(items,
+				gui.NewQStandardItem2(trans.Date),
+				gui.NewQStandardItem2(trans.Payee),
+				gui.NewQStandardItem2(fmt.Sprintf("%.2f", trans.Amount)),
+				gui.NewQStandardItem2(item.Label),
+			)
+		} else if item, err := w.db.Document("payee", trans.Payee); err == nil {
 			items = append(items,
 				gui.NewQStandardItem2(trans.Date),
 				gui.NewQStandardItem2(trans.Payee),
@@ -212,7 +220,13 @@ func (w *Gui) data(mode int) {
 		}
 		items[1].SetToolTip(trans.Desc)
 		w.tlist.AppendRow(items)
-		w.dlist = append(w.dlist, database.Content{Date: date, Payee: trans.Payee, Desc: trans.Desc, Amount: trans.Amount})
+		w.dlist = append(w.dlist, database.Content{
+			Date:      date,
+			Payee:     trans.Payee,
+			Desc:      trans.Desc,
+			Amount:    trans.Amount,
+			Datasheet: id,
+		})
 	}
 
 	width := float32(w.Geometry().Width())
@@ -236,7 +250,7 @@ func (w *Gui) save() {
 			data := w.tlist.Data(index, int(core.Qt__DisplayRole))
 			trans = append(trans, data.ToString())
 		}
-		trans = append(trans, w.tlist.Item(row, 1).ToolTip())
+		trans = append(trans, w.tlist.Item(row, 1).ToolTip(), w.dlist[row].Datasheet)
 		if doc := w.document(trans); len(doc.Label) > 0 {
 			w.db.Save(doc)
 		}
@@ -252,7 +266,7 @@ func (w *Gui) update(item *gui.QStandardItem) {
 		data := w.tlist.Data(index, int(core.Qt__DisplayRole))
 		trans = append(trans, data.ToString())
 	}
-	trans = append(trans, w.tlist.Item(item.Row(), 1).ToolTip())
+	trans = append(trans, w.tlist.Item(item.Row(), 1).ToolTip(), "n/a")
 
 	dsold := datasheet.Content{
 		Date:   w.dlist[item.Row()].Date.Format("01-02-06"),
@@ -266,6 +280,8 @@ func (w *Gui) update(item *gui.QStandardItem) {
 		Desc:   w.document(trans).Desc,
 		Amount: w.document(trans).Amount,
 	}
+
+	trans[5] = w.db.Hash(dsnew)
 	dbold := w.dlist[item.Row()]
 	dbnew := w.document(trans)
 
