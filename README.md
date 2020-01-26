@@ -53,7 +53,7 @@ n/a
 
 ## Usage
 
-Run the program by calling from terminal:
+Run the program by calling:
 
 ```bash
 ./go-expensegui
