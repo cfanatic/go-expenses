@@ -3,5 +3,5 @@
 gui/moc*
 darwin/
 deploy/
-res/
+misc/
 go-expensegui
