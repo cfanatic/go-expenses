@@ -2,7 +2,14 @@
 
 This tool is the graphical front-end for [go-expense](https://github.com/cfanatic/go-expense).
 
-The graphical user interface shall simplify the process of importing and labeling expense data.
+It helps you analyze your monthly and yearly expenses by giving answers to following questions:
+
+1. How much do you spend on average per month and year?
+2. How much would you be able to set aside each month for savings?
+3. What are the highest cost types, e.g. rent, car, food, etc.?
+4. Where are potentials to reduce costs?
+
+The graphical user interface shall simplify the process of importing and labeling account statement transactions.
 
 ## Requirements
 
@@ -44,8 +51,10 @@ n/a
 
 ## Usage
 
-Run the program:
+Run the program by calling:
 
 ```bash
 ./go-expensegui
 ```
+
+Load the sample account statements which can be found in folder `/res/` and label each transaction concerning cost type.
