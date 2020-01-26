@@ -10,8 +10,9 @@ It helps you analyze your monthly and yearly expenses by giving answers to follo
 4. Where are potentials to reduce costs?
 
 The graphical user interface shall simplify the process of importing and labeling account statement transactions.
+Labeling is done in automatic fashion whenever a similar transaction can be found in the database.
 
-Three sample account statements can be found under folder `res/` in this repository.
+Three sample account statements can be found in folder `res/`.
 
 ## Requirements
 
@@ -59,7 +60,7 @@ Run the program by calling:
 ./go-expensegui
 ```
 
-Import the sample account statements and give a cost type label for each transaction:
+Import each account statement and specify cost type labels for all transactions:
 
 ![Data_Label](https://raw.githubusercontent.com/cfanatic/go-expensegui/master/res/go-expensegui-1.png)
 
@@ -71,10 +72,12 @@ Exclude cost groups from statistical analysis by right-clicking on Label fields:
 
 ![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expensegui/master/res/go-expensegui-2.png)
 
-Display the statistical analysis for the particular account statement:
+## Analysis
+
+Analyze the monthly expenses for a particular account statement:
 
 ![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expensegui/master/res/go-expensegui-4.png)
 
-Display the complete statistical analysis for all account statements which are available in the database:
+Show the complete analysis for all account statements which are available in the database:
 
 ![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expensegui/master/res/go-expensegui-5.png)
