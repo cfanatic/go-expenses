@@ -10,7 +10,7 @@ It helps you analyze your monthly and yearly expenses by giving answers to follo
 4. Where are potentials to reduce costs?
 
 The graphical user interface shall simplify the process of importing and labeling account statement transactions.
-Labeling is done in automatic fashion whenever a similar transaction can be found in the database.
+Labeling is done in automatic fashion whenever a similar transaction is found in the database.
 
 Three sample account statements can be found in folder `res/`.
 
@@ -37,7 +37,7 @@ go build
 
 ```bash
 docker pull therecipe/qt:linux_debian_9
-docker build -t expensegui:latest -f Dockerfile .
+docker build -t expensegui:latest -f Dockerfile.linux .
 docker run --name expensegui expensegui:latest
 docker cp expensegui:/home/user/work/src/github.com/cfanatic/go-expensegui/deploy/linux/go-expensegui .
 ```
@@ -46,7 +46,7 @@ docker cp expensegui:/home/user/work/src/github.com/cfanatic/go-expensegui/deplo
 
 ```bash
 docker pull therecipe/qt:windows_64_static
-docker build -t expensegui:latest -f Dockerfile .
+docker build -t expensegui:latest -f Dockerfile.win .
 docker run --name expensegui expensegui:latest
 docker cp expensegui:/home/user/work/src/github.com/cfanatic/go-expensegui/deploy/windows/go-expensegui.exe .
 ```
@@ -60,11 +60,7 @@ docker pull mongo:latest
 docker run -d -p 27017:27017 --name expenses mongo:latest
 ```
 
-Run the program:
-
-```bash
-./go-expensegui
-```
+Run the program.
 
 Import each account statement and specify cost type labels for all transactions:
 

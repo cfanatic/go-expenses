@@ -1,0 +1,11 @@
+FROM therecipe/qt:linux_debian_9 AS qt
+
+RUN apt-get update
+RUN apt-get -y install git
+
+WORKDIR /home/user/work/src/github.com/cfanatic/
+RUN go get -v -d github.com/cfanatic/go-expensegui
+
+ENV QT_MXE_ARCH=amd64
+RUN qtmoc desktop go-expensegui
+RUN qtdeploy build desktop github.com/cfanatic/go-expensegui
