@@ -31,8 +31,6 @@ Run the particular build process for one of the hosts below:
 ```bash
 qtmoc desktop
 go build
-docker pull mongo:latest
-docker run -d -p 27017:27017 --name expenses mongo:latest
 ```
 
 ### Linux
@@ -42,19 +40,27 @@ docker pull therecipe/qt:linux_debian_9
 docker build -t expensegui:latest -f Dockerfile .
 docker run --name expensegui expensegui:latest
 docker cp expensegui:/home/user/work/src/github.com/cfanatic/go-expensegui/deploy/linux/go-expensegui .
-docker pull mongo:latest
-docker run -d -p 27017:27017 --name expenses mongo:latest
 ```
 
 ### Windows
 
 ```bash
-n/a
+docker pull therecipe/qt:windows_64_static
+docker build -t expensegui:latest -f Dockerfile .
+docker run --name expensegui expensegui:latest
+docker cp expensegui:/home/user/work/src/github.com/cfanatic/go-expensegui/deploy/windows/go-expensegui.exe .
 ```
 
 ## Usage
 
-Run the program by calling:
+Start the MongoDB database:
+
+```bash
+docker pull mongo:latest
+docker run -d -p 27017:27017 --name expenses mongo:latest
+```
+
+Run the program:
 
 ```bash
 ./go-expensegui
