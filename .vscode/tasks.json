@@ -5,42 +5,35 @@
             "label": "1: Generate",
             "type": "shell",
             "isBackground": true,
-            "command": "qtmoc desktop",
+            "command": "make generate",
             "problemMatcher": []
         },
         {
-            "label": "2: Compile",
+            "label": "2: Build",
             "type": "shell",
             "isBackground": true,
-            "command": "go build",
+            "command": "make build",
             "problemMatcher": []
         },
         {
-            "label": "3: Execute",
+            "label": "3: Deploy",
             "type": "shell",
             "isBackground": true,
-            "command": "./go-expensegui",
+            "command": "make deploy",
             "problemMatcher": []
         },
         {
-            "label": "4: Deploy",
+            "label": "4: Clean",
             "type": "shell",
             "isBackground": true,
-            "command": "go build && ./go-expensegui",
+            "command": "make clean",
             "problemMatcher": []
         },
         {
             "label": "5: All",
             "type": "shell",
             "isBackground": true,
-            "command": "qtmoc desktop && go run .",
-            "problemMatcher": []
-        },
-        {
-            "label": "6: Clean",
-            "type": "shell",
-            "isBackground": true,
-            "command": "rm gui/moc* && rm go-expensegui",
+            "command": "make all",
             "problemMatcher": []
         }
     ]
