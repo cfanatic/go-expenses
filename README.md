@@ -72,22 +72,22 @@ Run the program.
 
 Import each account statement and specify cost type labels for all transactions:
 
-![Data_Label](https://raw.githubusercontent.com/cfanatic/go-expenses/merge-repositories/cmd/expenses/resources/go-expenses-1.png)
+![Data_Label](https://raw.githubusercontent.com/cfanatic/go-expenses/master/cmd/expenses/resources/go-expenses-1.png)
 
 Show transaction details by hovering over Payee fields:
 
-![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expenses/merge-repositories/cmd/expenses/resources/go-expenses-3.png)
+![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expenses/master/cmd/expenses/resources/go-expenses-3.png)
 
 Exclude cost groups from statistical analysis by right-clicking on Label fields:
 
-![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expenses/merge-repositories/cmd/expenses/resources/go-expenses-2.png)
+![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expenses/master/cmd/expenses/resources/go-expenses-2.png)
 
 ## Analysis
 
 Analyze the monthly expenses for a particular account statement:
 
-![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expenses/merge-repositories/cmd/expenses/resources/go-expenses-4.png)
+![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expenses/master/cmd/expenses/resources/go-expenses-4.png)
 
 Show the complete analysis for all account statements which are available in the database:
 
-![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expenses/merge-repositories/cmd/expenses/resources/go-expenses-5.png)
+![Data_Exclude](https://raw.githubusercontent.com/cfanatic/go-expenses/master/cmd/expenses/resources/go-expenses-5.png)
