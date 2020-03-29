@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cfanatic/go-expense/account"
-	"github.com/cfanatic/go-expense/database"
-	"github.com/cfanatic/go-expense/datasheet"
+	"github.com/cfanatic/go-expenses/account"
+	"github.com/cfanatic/go-expenses/database"
+	"github.com/cfanatic/go-expenses/datasheet"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"

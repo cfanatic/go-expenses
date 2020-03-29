@@ -4,6 +4,6 @@ RUN apt-get update
 RUN apt-get -y install git
 
 WORKDIR /home/user/work/src/github.com/cfanatic/
-RUN go get -v -d github.com/cfanatic/go-expensegui
+RUN go get -v -d github.com/cfanatic/go-expenses
 
-RUN qtdeploy build windows github.com/cfanatic/go-expensegui
+RUN qtdeploy build windows github.com/cfanatic/go-expenses

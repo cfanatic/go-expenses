@@ -1,15 +1,15 @@
 generate:
-	qtmoc desktop
+	qtmoc desktop cmd/expenses/
 
 build:
-	go build
+	go build -o bin/go-expenses cmd/expenses/main.go
 
 deploy:
-	go build
-	./go-expensegui
+	@go build -o bin/go-expenses cmd/expenses/main.go
+	@./bin/go-expenses
 
 clean:
-	rm gui/moc*
-	rm go-expensegui
+	rm -f gui/moc*
+	rm -f -r bin/
 
 all: generate deploy

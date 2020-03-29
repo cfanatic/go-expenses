@@ -4,8 +4,8 @@ RUN apt-get update
 RUN apt-get -y install git
 
 WORKDIR /home/user/work/src/github.com/cfanatic/
-RUN go get -v -d github.com/cfanatic/go-expensegui
+RUN go get -v -d github.com/cfanatic/go-expenses
 
 ENV QT_MXE_ARCH=amd64
-RUN qtmoc desktop go-expensegui
-RUN qtdeploy build desktop github.com/cfanatic/go-expensegui
+RUN qtmoc desktop go-expenses
+RUN qtdeploy build desktop github.com/cfanatic/go-expenses
