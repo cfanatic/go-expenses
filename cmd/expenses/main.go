@@ -17,14 +17,14 @@ const (
 )
 
 func main() {
+	if DIR[len(DIR)-1:] != "/" {
+		log.Println("Terminate constant 'DIR' with a forward slash")
+		return
+	}
 	switch MODE {
 	case "CLI":
 		var acc account.IAccount
 		var exps []*account.Expense
-		if DIR[len(DIR)-1:] != "/" {
-			log.Println("Terminate constant 'DIR' with a forward slash")
-			return
-		}
 		if dir, _ := ioutil.ReadDir(DIR); len(dir) > 0 {
 			for _, file := range dir {
 				str := strings.Split(file.Name(), ".")
@@ -49,10 +49,6 @@ func main() {
 	case "GUI":
 		var app = widgets.NewQApplication(len(os.Args), os.Args)
 		var win = gui.NewGui(nil, 0)
-		if DIR[len(DIR)-1:] != "/" {
-			log.Println("Terminate constant 'DIR' with a forward slash")
-			return
-		}
 		win.InitWith(app)
 		win.Show()
 		app.Exec()
