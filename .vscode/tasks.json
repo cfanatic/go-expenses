@@ -16,21 +16,28 @@
             "problemMatcher": []
         },
         {
-            "label": "3: Deploy",
+            "label": "3: Run",
+            "type": "shell",
+            "isBackground": true,
+            "command": "make run",
+            "problemMatcher": []
+        },
+        {
+            "label": "4: Deploy",
             "type": "shell",
             "isBackground": true,
             "command": "make deploy",
             "problemMatcher": []
         },
         {
-            "label": "4: Clean",
+            "label": "5: Clean",
             "type": "shell",
             "isBackground": true,
             "command": "make clean",
             "problemMatcher": []
         },
         {
-            "label": "5: All",
+            "label": "6: All",
             "type": "shell",
             "isBackground": true,
             "command": "make all",
